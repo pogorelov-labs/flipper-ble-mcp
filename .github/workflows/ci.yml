@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install ruff pytest
+      - name: Syntax check
+        run: python -m py_compile src/flipper_ble_mcp/*.py
+      - name: Lint (critical rules)
+        run: ruff check src/ --select E9,F63,F7,F82
+      - name: Tests (hardware-free)
+        run: PYTHONPATH=src python -m pytest -q tests/
+
+  kb-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: KB index is up to date
+        run: |
+          cd .
+          python3 build-kb-index.py
+          git diff --exit-code -- llms.txt llms-full.txt uc-index.json README.md \
+            || (echo "::error::KB index stale — run: python3 build-kb-index.py" && exit 1)
