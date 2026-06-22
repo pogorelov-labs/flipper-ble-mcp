@@ -21,5 +21,6 @@ The first release — pending rig verification before it is tagged **v0.1.0**.
 
 ### Fixed
 - Deterministic KB index build (sort docs by path) so generated artifacts are byte-identical across OSes.
+- **Installability:** vendored the Flipper protobuf message classes (BSD-3, protobuf-only) under `_proto/` and dropped the `flipperzero-protobuf` dependency — it transitively pinned `numpy==1.22.3`, which has no modern wheel and blocked a clean `pip install` on macOS arm64.
 
 [Unreleased]: https://github.com/pogorelov-labs/flipper-ble-mcp/commits/main
