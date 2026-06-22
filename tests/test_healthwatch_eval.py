@@ -14,17 +14,23 @@ def _snap(**battery):
 
 
 def test_low_battery_while_discharging_alerts():
-    out = hw.evaluate(_snap(charge_level=9, charge_state="discharging", battery_health=100, battery_temp=25), None)
+    out = hw.evaluate(
+        _snap(charge_level=9, charge_state="discharging", battery_health=100, battery_temp=25), None
+    )
     assert any(lvl == "ALERT" for lvl, _ in out)
 
 
 def test_low_battery_while_charging_does_not_alert():
-    out = hw.evaluate(_snap(charge_level=9, charge_state="charging", battery_health=100, battery_temp=25), None)
+    out = hw.evaluate(
+        _snap(charge_level=9, charge_state="charging", battery_health=100, battery_temp=25), None
+    )
     assert not any(lvl == "ALERT" for lvl, _ in out)
 
 
 def test_healthy_is_silent():
-    out = hw.evaluate(_snap(charge_level=86, charge_state="discharging", battery_health=100, battery_temp=25), None)
+    out = hw.evaluate(
+        _snap(charge_level=86, charge_state="discharging", battery_health=100, battery_temp=25), None
+    )
     assert out == []
 
 
@@ -48,7 +54,10 @@ def test_unreachable_warns():
 
 def test_firmware_change_is_a_notice():
     cur = {
-        "reachable": True, "battery": {}, "storage_ext": {}, "rtc": {},
+        "reachable": True,
+        "battery": {},
+        "storage_ext": {},
+        "rtc": {},
         "device": {"firmware_version": "mntm-dev", "firmware_commit": "NEW", "ble_mac": "X"},
     }
     prev = {"device": {"firmware_version": "mntm-dev", "firmware_commit": "OLD", "ble_mac": "X"}}

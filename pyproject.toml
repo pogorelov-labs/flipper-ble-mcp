@@ -20,6 +20,7 @@ dependencies = [
   "mcp>=1.2",
   "bleak>=0.22",
   "flipperzero-protobuf>=0.1",   # BSD-3-Clause; community Flipper protobuf bindings (github.com/evilpete/flipperzero_protobuf_py)
+  "numpy>=2",                    # transitive (via flipperzero-protobuf); pin to a wheel-having version so macOS arm64 installs don't build from source
 ]
 
 [project.optional-dependencies]
