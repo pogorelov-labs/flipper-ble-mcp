@@ -5,7 +5,9 @@
 > Drive a **Flipper Zero** wirelessly over **Bluetooth LE** from Claude — no USB cable — backed by
 > a **self-evolving knowledge base** that makes every session faster than the last.
 
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![CI](https://img.shields.io/github/actions/workflow/status/pogorelov-labs/flipper-ble-mcp/ci.yml?branch=main&label=CI)](https://github.com/pogorelov-labs/flipper-ble-mcp/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/flipper-ble-mcp)](https://pypi.org/project/flipper-ble-mcp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Platform: macOS](https://img.shields.io/badge/platform-macOS-lightgrey.svg)
 ![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)
 ![MCP](https://img.shields.io/badge/Model_Context_Protocol-server-purple.svg)

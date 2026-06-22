@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "flipper-ble-mcp"
+abstract: "Wireless Flipper Zero control for Claude over Bluetooth LE — an MCP server with a self-evolving knowledge base."
+type: software
+authors:
+  - family-names: Pogorelov
+    given-names: Ruslan
+repository-code: "https://github.com/pogorelov-labs/flipper-ble-mcp"
+license: MIT
+version: 0.1.0

@@ -24,7 +24,7 @@ import sys
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 # Files that are entry points / generated / meta — never listed as content docs.
-EXCLUDE = {"README.md", "CLAUDE.md", "CONTRIBUTING.md", "SECURITY.md"}
+EXCLUDE = {"README.md", "CLAUDE.md", "CONTRIBUTING.md", "SECURITY.md", "ROADMAP.md", "CHANGELOG.md", "CODE_OF_CONDUCT.md"}
 
 DOMAIN_ORDER = ["core", "firmware", "hardware", "capabilities", "cards",
                 "wifi", "bluetooth", "theory", "topics", "resources"]
