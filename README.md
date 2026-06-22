@@ -64,7 +64,8 @@ A persistent daemon keeps a single BLE connection open (status/reads ~0.1–0.3 
 
 ```bash
 git clone https://github.com/pogorelov-labs/flipper-ble-mcp && cd flipper-ble-mcp
-./app/build_app.sh            # builds + ad-hoc-signs FlipperBLE.app (one-time; no Apple Dev account)
+python3 -m venv .venv && .venv/bin/pip install -e .   # bleak, protobuf, mcp + the package
+./app/build_app.sh .venv/bin/python                   # build + ad-hoc-sign the Bluetooth helper (one-time)
 ```
 Add the MCP server to Claude — `claude mcp add flipper-ble -- uvx flipper-ble-mcp`, or in your Claude Desktop config:
 

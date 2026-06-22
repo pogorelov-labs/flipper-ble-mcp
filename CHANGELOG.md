@@ -22,5 +22,6 @@ The first release — pending rig verification before it is tagged **v0.1.0**.
 ### Fixed
 - Deterministic KB index build (sort docs by path) so generated artifacts are byte-identical across OSes.
 - **Installability:** vendored the Flipper protobuf message classes (BSD-3, protobuf-only) under `_proto/` and dropped the `flipperzero-protobuf` dependency — it transitively pinned `numpy==1.22.3`, which has no modern wheel and blocked a clean `pip install` on macOS arm64.
+- **Runtime:** `app/build_app.sh` now injects `PYTHONPATH` and pre-flights `bleak`/`protobuf`/the package, so the built helper app's daemon can import the vendored modules and actually start (verified live).
 
 [Unreleased]: https://github.com/pogorelov-labs/flipper-ble-mcp/commits/main
