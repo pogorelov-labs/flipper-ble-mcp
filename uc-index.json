@@ -337,9 +337,9 @@
       "canonical_doc": "bluetooth/ble-spam.md",
       "docs": [
         "bluetooth/ble-spam.md",
-        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/README.md",
         "bluetooth/interception.md",
-        "bluetooth/README.md"
+        "resources/apps-esp-ble-nrf24.md"
       ],
       "name": "BLE Spam",
       "category": "BLE",
@@ -350,9 +350,9 @@
       "canonical_doc": "bluetooth/airtag-tracker-detection.md",
       "docs": [
         "bluetooth/airtag-tracker-detection.md",
-        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/README.md",
         "bluetooth/interception.md",
-        "bluetooth/README.md"
+        "resources/apps-esp-ble-nrf24.md"
       ],
       "name": "FindMy Flipper",
       "category": "BLE",
@@ -363,9 +363,9 @@
       "canonical_doc": "wifi/recon-and-attacks.md",
       "docs": [
         "wifi/recon-and-attacks.md",
+        "resources/apps-esp-ble-nrf24.md",
         "wifi/README.md",
-        "wifi/marauder-mcp-scan.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "wifi/marauder-mcp-scan.md"
       ],
       "name": "Wi-Fi scan/recon",
       "category": "WiFi",
@@ -376,8 +376,8 @@
       "canonical_doc": "wifi/recon-and-attacks.md",
       "docs": [
         "wifi/recon-and-attacks.md",
-        "wifi/README.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "resources/apps-esp-ble-nrf24.md",
+        "wifi/README.md"
       ],
       "name": "Sniff to PCAP",
       "category": "WiFi",
@@ -388,10 +388,10 @@
       "canonical_doc": "wifi/wpa-handshake-pmkid.md",
       "docs": [
         "wifi/wpa-handshake-pmkid.md",
-        "wifi/own-network-audit.md",
-        "wifi/deauth.md",
+        "resources/apps-esp-ble-nrf24.md",
         "wifi/README.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "wifi/deauth.md",
+        "wifi/own-network-audit.md"
       ],
       "name": "WPA handshake/PMKID capture",
       "category": "WiFi",
@@ -402,9 +402,9 @@
       "canonical_doc": "wifi/deauth.md",
       "docs": [
         "wifi/deauth.md",
-        "wifi/evil-portal.md",
+        "resources/apps-esp-ble-nrf24.md",
         "wifi/README.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "wifi/evil-portal.md"
       ],
       "name": "Deauthentication (authorized)",
       "category": "WiFi",
@@ -415,8 +415,8 @@
       "canonical_doc": "wifi/recon-and-attacks.md",
       "docs": [
         "wifi/recon-and-attacks.md",
-        "wifi/README.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "resources/apps-esp-ble-nrf24.md",
+        "wifi/README.md"
       ],
       "name": "Beacon/probe/SSID spam",
       "category": "WiFi",
@@ -427,10 +427,10 @@
       "canonical_doc": "wifi/evil-portal.md",
       "docs": [
         "wifi/evil-portal.md",
-        "wifi/deauth.md",
-        "wifi/README.md",
         "resources/apps-esp-ble-nrf24.md",
-        "theory/human-layer.md"
+        "theory/human-layer.md",
+        "wifi/README.md",
+        "wifi/deauth.md"
       ],
       "name": "Evil Portal",
       "category": "WiFi",
@@ -441,8 +441,8 @@
       "canonical_doc": "wifi/recon-and-attacks.md",
       "docs": [
         "wifi/recon-and-attacks.md",
-        "wifi/README.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "resources/apps-esp-ble-nrf24.md",
+        "wifi/README.md"
       ],
       "name": "Channel/signal analyzer",
       "category": "WiFi",
@@ -453,8 +453,8 @@
       "canonical_doc": "wifi/recon-and-attacks.md",
       "docs": [
         "wifi/recon-and-attacks.md",
-        "wifi/README.md",
-        "resources/apps-esp-ble-nrf24.md"
+        "resources/apps-esp-ble-nrf24.md",
+        "wifi/README.md"
       ],
       "name": "Wardrive (log APs)",
       "category": "WiFi",
@@ -465,8 +465,8 @@
       "canonical_doc": "bluetooth/interception.md",
       "docs": [
         "bluetooth/interception.md",
-        "resources/apps-esp-ble-nrf24.md",
-        "bluetooth/README.md"
+        "bluetooth/README.md",
+        "resources/apps-esp-ble-nrf24.md"
       ],
       "name": "BLE scan/sniff (Marauder)",
       "category": "BLE",
@@ -477,9 +477,9 @@
       "canonical_doc": "bluetooth/airtag-tracker-detection.md",
       "docs": [
         "bluetooth/airtag-tracker-detection.md",
-        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/README.md",
         "bluetooth/interception.md",
-        "bluetooth/README.md"
+        "resources/apps-esp-ble-nrf24.md"
       ],
       "name": "AirTag/tracker detection",
       "category": "Defensive",
@@ -490,8 +490,8 @@
       "canonical_doc": "topics/security-pentest.md",
       "docs": [
         "topics/security-pentest.md",
-        "bluetooth/interception.md",
-        "bluetooth/README.md"
+        "bluetooth/README.md",
+        "bluetooth/interception.md"
       ],
       "name": "Bluetooth skimmer detection",
       "category": "Defensive",
@@ -626,9 +626,9 @@
       "canonical_doc": "wifi/recon-and-attacks.md",
       "docs": [
         "wifi/recon-and-attacks.md",
+        "wifi/README.md",
         "wifi/deauth.md",
-        "wifi/wpa-handshake-pmkid.md",
-        "wifi/README.md"
+        "wifi/wpa-handshake-pmkid.md"
       ],
       "name": "Detect Wi-Fi deauth attacks",
       "category": "Defensive",

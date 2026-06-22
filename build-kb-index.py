@@ -134,7 +134,7 @@ def collect():
                 "has_meta": bool(meta) and "title" in meta,
             }
             docs.append(doc)
-    return docs, missing
+    docs.sort(key=lambda d: d["path"]); return docs, missing
 
 
 def sort_key(doc):
