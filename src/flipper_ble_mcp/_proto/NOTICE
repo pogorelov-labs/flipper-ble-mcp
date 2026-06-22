@@ -1,0 +1,14 @@
+The protobuf message modules in this directory (*_pb2.py) are VENDORED, unmodified, from:
+
+  flipperzero_protobuf  —  https://github.com/evilpete/flipperzero_protobuf_py
+  License: BSD-3-Clause
+  Authors: Flipper Devices & community (incl. Peter Shipley)
+
+Only the compiled protobuf message classes (the upstream `flipperzero_protobuf_compiled`
+subpackage) are vendored — they depend only on the `protobuf` runtime. They are bundled here so
+that flipper-ble-mcp installs cleanly: the upstream PyPI package additionally pins numpy==1.22.3
+(and pyserial) for serial-transport helpers we do not use, and that pin fails to build on modern
+macOS / Python.
+
+The canonical BSD-3-Clause license text is at:
+  https://github.com/evilpete/flipperzero_protobuf_py/blob/master/LICENSE

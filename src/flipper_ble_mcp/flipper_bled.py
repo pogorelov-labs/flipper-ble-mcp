@@ -26,7 +26,8 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ble_worker as w  # noqa: E402  (now importable: dispatch is under __main__)
-from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2  # noqa: E402
+
+from flipper_ble_mcp._proto import flipper_pb2  # noqa: E402
 
 _HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp")
 os.makedirs(_HOME, exist_ok=True)
@@ -385,7 +386,7 @@ async def h_rename(args):
 
 
 async def h_gpioread(args):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+    from flipper_ble_mcp._proto import gpio_pb2
 
     pin = args[0].upper() if args else ""
     if pin not in gpio_pb2.GpioPin.keys():
@@ -410,7 +411,7 @@ async def h_gpioread(args):
 
 
 async def h_gpiowrite(args):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+    from flipper_ble_mcp._proto import gpio_pb2
 
     if len(args) < 2:
         return {"ok": False, "text": "usage: gpiowrite <PIN> <0|1>"}
@@ -427,7 +428,7 @@ async def h_gpiowrite(args):
 
 
 async def h_gpiomode(args):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+    from flipper_ble_mcp._proto import gpio_pb2
 
     if len(args) < 2:
         return {"ok": False, "text": "usage: gpiomode <PIN> <output|input>"}
@@ -748,7 +749,7 @@ async def h_write(args):
 
 
 async def h_reboot(args):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import system_pb2
+    from flipper_ble_mcp._proto import system_pb2
 
     mode = args[0].upper() if args else "OS"
     if mode not in ("OS", "DFU", "UPDATE"):

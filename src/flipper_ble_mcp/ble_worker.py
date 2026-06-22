@@ -76,7 +76,7 @@ def _frame(body: bytes) -> bytes:
 def _input_frames(plan):
     """plan: list of (button, TYPE). Returns framed gui_send_input_event_request bytes,
     built via the protobuf lib (zero hand-encoding risk)."""
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2, gui_pb2
+    from flipper_ble_mcp._proto import flipper_pb2, gui_pb2
 
     frames = []
     for btn, itype in plan:
@@ -509,7 +509,8 @@ def do_app_launch(tokens):
     """Launch an app by name over BLE (app_start_request, PB_Main field 16). tokens: the app
     name (may be multiple words) optionally with a trailing '+shot' to grab its first frame."""
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2
 
     shot = "+shot" in tokens
     toks = [t for t in tokens if t != "+shot"]
@@ -597,7 +598,8 @@ def do_app_launch(tokens):
 def do_storage_list(tokens):
     """List a directory over BLE (storage_list_request). tokens join into the path (may have spaces)."""
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2
 
     path = " ".join(tokens).strip() or "/ext"
     m = flipper_pb2.Main()
@@ -657,7 +659,8 @@ def do_storage_read(tokens):
     """Read a file over BLE (storage_read_request). tokens join into the path. Saves raw bytes
     to ble_file.bin and reports size + text/binary."""
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2
 
     path = " ".join(tokens).strip()
     if not path:
@@ -723,7 +726,7 @@ def do_storage_read(tokens):
 # ---- generic RPC helpers ----------------------------------------------------
 def _mk(setter):
     """Build a framed PB_Main (command_id=1) configured by setter(main)."""
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+    from flipper_ble_mcp._proto import flipper_pb2
 
     m = flipper_pb2.Main()
     m.command_id = 1
@@ -745,7 +748,8 @@ def _rpc(build_req, handle, timeout=20):
     """Connect over BLE, send build_req() to TX, feed each parsed PB_Main to handle(main)
     until it returns True or has_next=0. Returns True if the device was found."""
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2
 
     state = {"found": False}
 
@@ -831,7 +835,7 @@ def do_get_datetime():
 def do_set_datetime(tokens):
     import datetime as _dt
 
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+    from flipper_ble_mcp._proto import flipper_pb2
 
     if tokens and tokens[0] != "now":
         y, mo, d, hh, mm, ss = (int(x) for x in tokens[:6])
@@ -906,7 +910,8 @@ def do_app_load(tokens):
 
 def do_app_button(tokens):
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2
 
     args = " ".join(tokens).strip()
     press = _mk(lambda m: setattr(m.app_button_press_request, "args", args))
@@ -1066,7 +1071,8 @@ def do_storage_rename(tokens):
 def do_storage_write(tokens):
     """Upload ble_upload.bin to <dest> over BLE (chunked storage_write_request stream)."""
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2
 
     path = " ".join(tokens).strip()
     if not path:
@@ -1152,7 +1158,7 @@ def _status_str(code):
     """'OK' for 0, else 'ERR NN NAME - hint'."""
     if code == 0:
         return "OK"
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+    from flipper_ble_mcp._proto import flipper_pb2
 
     name = {v: k for k, v in flipper_pb2.CommandStatus.items()}.get(code, "ERROR")
     hint = _STATUS_HINT.get(code)
@@ -1183,7 +1189,8 @@ def do_desktop_unlock():
 def do_reboot(tokens):
     """Reboot the Flipper. mode in OS|DFU|UPDATE (default OS). No response (device resets)."""
     from bleak import BleakClient
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2, system_pb2
+
+    from flipper_ble_mcp._proto import flipper_pb2, system_pb2
 
     mode = tokens[0].upper() if tokens else "OS"
     if mode not in ("OS", "DFU", "UPDATE"):
@@ -1213,7 +1220,7 @@ def do_reboot(tokens):
 
 # ---- GPIO (over RPC) --------------------------------------------------------
 def do_gpio_read(tokens):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+    from flipper_ble_mcp._proto import gpio_pb2
 
     pin = tokens[0].upper() if tokens else ""
     if pin not in gpio_pb2.GpioPin.keys():
@@ -1235,7 +1242,7 @@ def do_gpio_read(tokens):
 
 
 def do_gpio_write(tokens):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+    from flipper_ble_mcp._proto import gpio_pb2
 
     if len(tokens) < 2:
         log("usage: gpiowrite <PIN> <0|1>")
@@ -1256,7 +1263,7 @@ def do_gpio_write(tokens):
 
 
 def do_gpio_mode(tokens):
-    from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+    from flipper_ble_mcp._proto import gpio_pb2
 
     if len(tokens) < 2:
         log("usage: gpiomode <PIN> <output|input>")

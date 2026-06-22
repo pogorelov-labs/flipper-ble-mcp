@@ -40,7 +40,7 @@ jobs:
           python-version: "3.11"
       - run: pip install -e .
       - name: Import modules (validates packaging + deps resolve on macOS)
-        run: python -c "import flipper_ble_mcp, flipper_ble_mcp.server, flipper_ble_mcp.ble_worker, flipper_ble_mcp.flipper_healthwatch; print('import OK')"
+        run: python -c "import flipper_ble_mcp, flipper_ble_mcp.server, flipper_ble_mcp.flipper_bled, flipper_ble_mcp.ble_worker, flipper_ble_mcp.flipper_healthwatch; print('import OK')"
 
   kb-index:
     runs-on: ubuntu-latest
