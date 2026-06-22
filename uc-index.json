@@ -1,0 +1,741 @@
+{
+  "_generated_by": "build-kb-index.py",
+  "_source": "use-cases.json kb_ref (canonical) + frontmatter use_cases (cross-refs)",
+  "count": 64,
+  "use_cases": {
+    "UC-01": {
+      "canonical_doc": "capabilities/infrared.md",
+      "docs": [
+        "capabilities/infrared.md",
+        "resources/apps-rfid-ibutton-infrared.md"
+      ],
+      "name": "Universal IR remote",
+      "category": "IR",
+      "real_use_score": 9,
+      "status": "Ready"
+    },
+    "UC-02": {
+      "canonical_doc": "capabilities/infrared.md",
+      "docs": [
+        "capabilities/infrared.md",
+        "resources/apps-rfid-ibutton-infrared.md"
+      ],
+      "name": "Learn & save a remote",
+      "category": "IR",
+      "real_use_score": 8,
+      "status": "Ready"
+    },
+    "UC-03": {
+      "canonical_doc": "capabilities/infrared.md",
+      "docs": [
+        "capabilities/infrared.md",
+        "resources/apps-rfid-ibutton-infrared.md"
+      ],
+      "name": "TV-B-Gone power-off",
+      "category": "IR",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-04": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "Capture/replay fixed-code remote",
+      "category": "SubGHz",
+      "real_use_score": 7,
+      "status": "Ready"
+    },
+    "UC-05": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "Frequency analyzer / RF survey",
+      "category": "SubGHz",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-06": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "Read RAW unknown signal",
+      "category": "SubGHz",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-07": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "Fixed-code brute-force",
+      "category": "SubGHz",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-08": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "Weather-station read",
+      "category": "SubGHz",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-09": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "TPMS read",
+      "category": "SubGHz",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-10": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "POCSAG pager decode",
+      "category": "SubGHz",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-11": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "Tesla charge-port opener",
+      "category": "SubGHz",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-12": {
+      "canonical_doc": "capabilities/sub-ghz.md",
+      "docs": [
+        "capabilities/sub-ghz.md",
+        "resources/apps-subghz.md",
+        "topics/subghz-region-lock.md"
+      ],
+      "name": "433 alarm/PIR/door sensor monitor",
+      "category": "SubGHz",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-13": {
+      "canonical_doc": "my-setup.md",
+      "docs": [
+        "my-setup.md",
+        "resources/apps-subghz.md"
+      ],
+      "name": "Long-range 433 capture/replay",
+      "category": "SubGHz",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-14": {
+      "canonical_doc": "my-setup.md",
+      "docs": [
+        "my-setup.md",
+        "resources/apps-subghz.md"
+      ],
+      "name": "Range-test own 433 gear",
+      "category": "SubGHz",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-15": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-rfid-ibutton-infrared.md"
+      ],
+      "name": "LF fob read/emulate/clone",
+      "category": "RFID-LF",
+      "real_use_score": 8,
+      "status": "Ready"
+    },
+    "UC-16": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "MIFARE Classic read/crack/clone",
+      "category": "NFC-HF",
+      "real_use_score": 7,
+      "status": "Ready"
+    },
+    "UC-17": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "NTAG/Ultralight read & emulate",
+      "category": "NFC-HF",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-18": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "Magic-card full clone",
+      "category": "NFC-HF",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-19": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md",
+        "theory/human-layer.md"
+      ],
+      "name": "NDEF tag writing",
+      "category": "NFC-HF",
+      "real_use_score": 7,
+      "status": "Ready"
+    },
+    "UC-20": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "PicoPass / HID iCLASS",
+      "category": "NFC-HF",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-21": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "Transit card read (Metroflip)",
+      "category": "NFC-HF",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-22": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "NFC toys emulate",
+      "category": "NFC-HF",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-23": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md",
+        "cards/README.md",
+        "resources/apps-nfc.md"
+      ],
+      "name": "DESFire/EMV metadata read",
+      "category": "NFC-HF",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-24": {
+      "canonical_doc": "capabilities/ibutton.md",
+      "docs": [
+        "capabilities/ibutton.md",
+        "resources/apps-rfid-ibutton-infrared.md"
+      ],
+      "name": "iButton read/emulate/write",
+      "category": "iButton",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-25": {
+      "canonical_doc": "capabilities/badusb.md",
+      "docs": [
+        "capabilities/badusb.md",
+        "resources/apps-badusb-automotive-misc.md",
+        "theory/human-layer.md"
+      ],
+      "name": "BadUSB attack payloads",
+      "category": "HID",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-26": {
+      "canonical_doc": "capabilities/badusb.md",
+      "docs": [
+        "capabilities/badusb.md",
+        "resources/apps-badusb-automotive-misc.md",
+        "theory/human-layer.md"
+      ],
+      "name": "BadUSB automation/keep-awake",
+      "category": "HID",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-27": {
+      "canonical_doc": "capabilities/badusb.md",
+      "docs": [
+        "capabilities/badusb.md",
+        "resources/apps-badusb-automotive-misc.md",
+        "theory/human-layer.md"
+      ],
+      "name": "BadBT/BadKB BLE keystrokes",
+      "category": "HID",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-28": {
+      "canonical_doc": "capabilities/badusb.md",
+      "docs": [
+        "capabilities/badusb.md",
+        "resources/apps-badusb-automotive-misc.md"
+      ],
+      "name": "BLE clicker / kbd-mouse remote",
+      "category": "HID",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-29": {
+      "canonical_doc": "bluetooth/ble-spam.md",
+      "docs": [
+        "bluetooth/ble-spam.md",
+        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/interception.md",
+        "bluetooth/README.md"
+      ],
+      "name": "BLE Spam",
+      "category": "BLE",
+      "real_use_score": 2,
+      "status": "Ready"
+    },
+    "UC-30": {
+      "canonical_doc": "bluetooth/airtag-tracker-detection.md",
+      "docs": [
+        "bluetooth/airtag-tracker-detection.md",
+        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/interception.md",
+        "bluetooth/README.md"
+      ],
+      "name": "FindMy Flipper",
+      "category": "BLE",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-31": {
+      "canonical_doc": "wifi/recon-and-attacks.md",
+      "docs": [
+        "wifi/recon-and-attacks.md",
+        "wifi/README.md",
+        "wifi/marauder-mcp-scan.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "Wi-Fi scan/recon",
+      "category": "WiFi",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-32": {
+      "canonical_doc": "wifi/recon-and-attacks.md",
+      "docs": [
+        "wifi/recon-and-attacks.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "Sniff to PCAP",
+      "category": "WiFi",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-33": {
+      "canonical_doc": "wifi/wpa-handshake-pmkid.md",
+      "docs": [
+        "wifi/wpa-handshake-pmkid.md",
+        "wifi/own-network-audit.md",
+        "wifi/deauth.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "WPA handshake/PMKID capture",
+      "category": "WiFi",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-34": {
+      "canonical_doc": "wifi/deauth.md",
+      "docs": [
+        "wifi/deauth.md",
+        "wifi/evil-portal.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "Deauthentication (authorized)",
+      "category": "WiFi",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-35": {
+      "canonical_doc": "wifi/recon-and-attacks.md",
+      "docs": [
+        "wifi/recon-and-attacks.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "Beacon/probe/SSID spam",
+      "category": "WiFi",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-36": {
+      "canonical_doc": "wifi/evil-portal.md",
+      "docs": [
+        "wifi/evil-portal.md",
+        "wifi/deauth.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md",
+        "theory/human-layer.md"
+      ],
+      "name": "Evil Portal",
+      "category": "WiFi",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-37": {
+      "canonical_doc": "wifi/recon-and-attacks.md",
+      "docs": [
+        "wifi/recon-and-attacks.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "Channel/signal analyzer",
+      "category": "WiFi",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-38": {
+      "canonical_doc": "wifi/recon-and-attacks.md",
+      "docs": [
+        "wifi/recon-and-attacks.md",
+        "wifi/README.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "Wardrive (log APs)",
+      "category": "WiFi",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-39": {
+      "canonical_doc": "bluetooth/interception.md",
+      "docs": [
+        "bluetooth/interception.md",
+        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/README.md"
+      ],
+      "name": "BLE scan/sniff (Marauder)",
+      "category": "BLE",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-40": {
+      "canonical_doc": "bluetooth/airtag-tracker-detection.md",
+      "docs": [
+        "bluetooth/airtag-tracker-detection.md",
+        "resources/apps-esp-ble-nrf24.md",
+        "bluetooth/interception.md",
+        "bluetooth/README.md"
+      ],
+      "name": "AirTag/tracker detection",
+      "category": "Defensive",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-41": {
+      "canonical_doc": "topics/security-pentest.md",
+      "docs": [
+        "topics/security-pentest.md",
+        "bluetooth/interception.md",
+        "bluetooth/README.md"
+      ],
+      "name": "Bluetooth skimmer detection",
+      "category": "Defensive",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-42": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md"
+      ],
+      "name": "USB-UART/SPI/I2C bridge",
+      "category": "GPIO",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-43": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md"
+      ],
+      "name": "SWD debug another MCU",
+      "category": "GPIO",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-44": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md"
+      ],
+      "name": "Logic analyzer",
+      "category": "GPIO",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-45": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md"
+      ],
+      "name": "GPIO sensor reading",
+      "category": "GPIO",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-46": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md"
+      ],
+      "name": "Relay/servo/LED control",
+      "category": "GPIO",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-47": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md",
+        "resources/apps-badusb-automotive-misc.md"
+      ],
+      "name": "Sentry Safe / e-safe opener",
+      "category": "GPIO",
+      "real_use_score": 4,
+      "status": "Ready"
+    },
+    "UC-48": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md",
+        "resources/apps-badusb-automotive-misc.md"
+      ],
+      "name": "TOTP 2FA authenticator",
+      "category": "Software",
+      "real_use_score": 8,
+      "status": "Ready"
+    },
+    "UC-49": {
+      "canonical_doc": "resources/best-github-repos.md",
+      "docs": [
+        "resources/best-github-repos.md"
+      ],
+      "name": "Games",
+      "category": "Software",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-50": {
+      "canonical_doc": "capabilities/badusb.md",
+      "docs": [
+        "capabilities/badusb.md",
+        "resources/apps-badusb-automotive-misc.md"
+      ],
+      "name": "Mouse Jiggler",
+      "category": "Software",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-51": {
+      "canonical_doc": "resources/best-github-repos.md",
+      "docs": [
+        "resources/best-github-repos.md"
+      ],
+      "name": "Utilities",
+      "category": "Software",
+      "real_use_score": 3,
+      "status": "Ready"
+    },
+    "UC-52": {
+      "canonical_doc": "topics/tinkering.md",
+      "docs": [
+        "topics/tinkering.md"
+      ],
+      "name": "Build own FAP/JS apps",
+      "category": "Software",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-53": {
+      "canonical_doc": "01-architecture.md",
+      "docs": [
+        "01-architecture.md",
+        "resources/apps-badusb-automotive-misc.md"
+      ],
+      "name": "U2F/FIDO second factor",
+      "category": "Software",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-54": {
+      "canonical_doc": "wifi/recon-and-attacks.md",
+      "docs": [
+        "wifi/recon-and-attacks.md",
+        "wifi/deauth.md",
+        "wifi/wpa-handshake-pmkid.md",
+        "wifi/README.md"
+      ],
+      "name": "Detect Wi-Fi deauth attacks",
+      "category": "Defensive",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-55": {
+      "canonical_doc": "topics/security-pentest.md",
+      "docs": [
+        "topics/security-pentest.md"
+      ],
+      "name": "PCAP to Wireshark analysis",
+      "category": "Defensive",
+      "real_use_score": 5,
+      "status": "Ready"
+    },
+    "UC-56": {
+      "canonical_doc": "topics/security-pentest.md",
+      "docs": [
+        "topics/security-pentest.md"
+      ],
+      "name": "Audit own RF/cards",
+      "category": "Defensive",
+      "real_use_score": 6,
+      "status": "Ready"
+    },
+    "UC-57": {
+      "canonical_doc": "hardware/buying-guide.md",
+      "docs": [
+        "hardware/buying-guide.md",
+        "resources/apps-esp-ble-nrf24.md"
+      ],
+      "name": "2.4GHz HID mousejacking",
+      "category": "WiFi",
+      "real_use_score": 4,
+      "status": "NeedAccessory"
+    },
+    "UC-58": {
+      "canonical_doc": "hardware/buying-guide.md",
+      "docs": [
+        "hardware/buying-guide.md"
+      ],
+      "name": "Geo-wardriving / mapping",
+      "category": "WiFi",
+      "real_use_score": 5,
+      "status": "NeedAccessory"
+    },
+    "UC-59": {
+      "canonical_doc": "hardware/buying-guide.md",
+      "docs": [
+        "hardware/buying-guide.md"
+      ],
+      "name": "315/868/915 long-range",
+      "category": "SubGHz",
+      "real_use_score": 5,
+      "status": "NeedAccessory"
+    },
+    "UC-60": {
+      "canonical_doc": "hardware/buying-guide.md",
+      "docs": [
+        "hardware/buying-guide.md"
+      ],
+      "name": "5GHz Wi-Fi testing",
+      "category": "WiFi",
+      "real_use_score": 4,
+      "status": "NeedAccessory"
+    },
+    "UC-61": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md"
+      ],
+      "name": "Pet/animal microchip read",
+      "category": "RFID-LF",
+      "real_use_score": 3,
+      "status": "ByDesign-No"
+    },
+    "UC-62": {
+      "canonical_doc": "theory/rolling-codes.md",
+      "docs": [
+        "theory/rolling-codes.md"
+      ],
+      "name": "Defeat rolling codes",
+      "category": "SubGHz",
+      "real_use_score": 1,
+      "status": "ByDesign-No"
+    },
+    "UC-63": {
+      "canonical_doc": "capabilities/nfc-rfid.md",
+      "docs": [
+        "capabilities/nfc-rfid.md"
+      ],
+      "name": "Clone/pay with EMV card",
+      "category": "NFC-HF",
+      "real_use_score": 1,
+      "status": "ByDesign-No"
+    },
+    "UC-64": {
+      "canonical_doc": "bluetooth/ble-sniffer-addon.md",
+      "docs": [
+        "bluetooth/ble-sniffer-addon.md",
+        "bluetooth/README.md"
+      ],
+      "name": "BLE connection sniffing",
+      "category": "BLE",
+      "real_use_score": 5,
+      "status": "NeedAccessory"
+    }
+  }
+}

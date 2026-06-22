@@ -1,0 +1,65 @@
+id,category,name,purpose,description,target,needs_accessory,firmware,real_use_score,difficulty,legality,status,prereq_consumable,time_to_value,kb_ref
+UC-01,IR,Universal IR remote,Control any IR device,"One remote for TVs, ACs, projectors, audio via built-in/universal DBs",Hardware,None,OFW,9,Easy,Low,Ready,None,Instant,capabilities/infrared.md
+UC-02,IR,Learn & save a remote,Replace a lost/extra remote,Capture each button of a real remote and re-emit it,Hardware,None,OFW,8,Easy,Low,Ready,None,Quick,capabilities/infrared.md
+UC-03,IR,TV-B-Gone power-off,Turn off nearby TVs,Brute common power codes; mostly a prank/novelty,Hardware,None,OFW,3,Easy,Medium,Ready,None,Instant,capabilities/infrared.md
+UC-04,SubGHz,Capture/replay fixed-code remote,Duplicate your own gate/garage/doorbell,Record and retransmit fixed (non-rolling) Sub-GHz remotes,Hardware,None,OFW,7,Easy,Medium,Ready,None,Quick,capabilities/sub-ghz.md
+UC-05,SubGHz,Frequency analyzer / RF survey,Find a transmitter's frequency,Detect active Sub-GHz frequency + protocol of a nearby device,Hardware,None,OFW,6,Easy,Low,Ready,None,Instant,capabilities/sub-ghz.md
+UC-06,SubGHz,Read RAW unknown signal,Capture an undecoded waveform,Record raw timing to replay when protocol is unknown,Hardware,None,OFW,5,Easy,Low,Ready,None,Quick,capabilities/sub-ghz.md
+UC-07,SubGHz,Fixed-code brute-force,Open small fixed-code systems,"Sweep a small fixed code space (de Bruijn); slow, old systems only",Hardware,None,CFW,3,Medium,High,Ready,None,Setup,capabilities/sub-ghz.md
+UC-08,SubGHz,Weather-station read,Read your outdoor sensors,Decode 433/868 weather sensor telemetry,Hardware,None,OFW,4,Easy,Low,Ready,None,Quick,capabilities/sub-ghz.md
+UC-09,SubGHz,TPMS read,Read tire-pressure sensors,Decode TPMS sensor IDs/pressure,Hardware,None,CFW,4,Medium,Low,Ready,None,Quick,capabilities/sub-ghz.md
+UC-10,SubGHz,POCSAG pager decode,Read POCSAG pages,Decode unencrypted pager traffic,Hardware,None,CFW,3,Medium,Medium,Ready,None,Quick,capabilities/sub-ghz.md
+UC-11,SubGHz,Tesla charge-port opener,Open your own Tesla charge port,Sends the 315/433 charge-port-open burst,Hardware,None,CFW,4,Easy,Low,Ready,None,Instant,capabilities/sub-ghz.md
+UC-12,SubGHz,433 alarm/PIR/door sensor monitor,Inspect your own alarm sensors,Capture/inspect 433 contact/PIR sensor signals,Hardware,None,CFW,4,Medium,Medium,Ready,None,Quick,capabilities/sub-ghz.md
+UC-13,SubGHz,Long-range 433 capture/replay,Work 433 gear at distance,External CC1101 + SMA antenna extends range to ~70-150m,Hardware,CC1101-433,CFW,6,Medium,Medium,Ready,None,Quick,my-setup.md
+UC-14,SubGHz,Range-test own 433 gear,Measure real remote range,Test how far your own remotes reach with the external board,Hardware,CC1101-433,CFW,6,Easy,Low,Ready,None,Quick,my-setup.md
+UC-15,RFID-LF,LF fob read/emulate/clone,Carry your 125kHz fobs on the Flipper,"Read EM4100/HID/Indala, emulate, write to T5577 blank",Hardware,T5577-blank,OFW,8,Easy,Medium,Ready,T5577 blank,Quick,capabilities/nfc-rfid.md
+UC-16,NFC-HF,MIFARE Classic read/crack/clone,Duplicate your own MIFARE cards,"Recover Crypto1 keys (dict/nested/mfkey), dump, emulate/clone",Hardware,None,CFW,7,Medium,Medium,Ready,None,Setup,capabilities/nfc-rfid.md
+UC-17,NFC-HF,NTAG/Ultralight read & emulate,Back up/emulate simple NFC tags,Read and emulate NTAG21x/Ultralight,Hardware,None,OFW,6,Easy,Low,Ready,None,Instant,capabilities/nfc-rfid.md
+UC-18,NFC-HF,Magic-card full clone,Make a 1:1 card copy,Write UID/block-0 to a magic card for a full clone,Hardware,Magic-card,CFW,5,Medium,Medium,Ready,Magic card,Quick,capabilities/nfc-rfid.md
+UC-19,NFC-HF,NDEF tag writing,Program useful NFC tags,"Write URLs, Wi-Fi join, vCard, shortcuts to blank NTAGs",Hardware,NTAG-blank,OFW,7,Easy,Low,Ready,NTAG21x blank,Quick,capabilities/nfc-rfid.md
+UC-20,NFC-HF,PicoPass / HID iCLASS,Handle legacy iCLASS access cards,Read/write/emulate legacy iCLASS via PicoPass (not SE/SEOS),Hardware,None,OFW,6,Medium,Medium,Ready,None,Quick,capabilities/nfc-rfid.md
+UC-21,NFC-HF,Transit card read (Metroflip),Read your transit card data,Parse balance/history of supported transit cards (read-only),Hardware,None,OFW,4,Easy,Low,Ready,None,Instant,capabilities/nfc-rfid.md
+UC-22,NFC-HF,NFC toys emulate,Use amiibo/Skylanders/Tonies,Emulate/write NFC toy tags for your own games,Hardware,None,OFW,5,Easy,Low,Ready,NTAG215 blank,Quick,capabilities/nfc-rfid.md
+UC-23,NFC-HF,DESFire/EMV metadata read,Inspect modern card public data,Read public DESFire/EMV info; no clone/pay,Hardware,None,CFW,3,Easy,Medium,Ready,None,Instant,capabilities/nfc-rfid.md
+UC-24,iButton,iButton read/emulate/write,Copy Dallas/Cyfral/Metakom keys,"Read intercom keys, emulate, write to RW blanks",Hardware,RW-blank,OFW,6,Easy,Medium,Ready,RW1990 blank,Quick,capabilities/ibutton.md
+UC-25,HID,BadUSB attack payloads,Authorized HID-injection testing,Ducky Script keystroke injection for pentests,Hybrid,None,OFW,5,Medium,High,Ready,None,Setup,capabilities/badusb.md
+UC-26,HID,BadUSB automation/keep-awake,Automate your own machine,"Auto-type, setup scripts, demos, keep-awake on your PC",Hybrid,None,OFW,5,Medium,Low,Ready,None,Setup,capabilities/badusb.md
+UC-27,HID,BadBT/BadKB BLE keystrokes,Wireless HID injection,"Keystroke injection over BLE, no cable",Hybrid,None,CFW,4,Medium,High,Ready,None,Setup,capabilities/badusb.md
+UC-28,HID,BLE clicker / kbd-mouse remote,Control a PC/phone wirelessly,Use the Flipper as a BLE keyboard/mouse (slides/media),Software,None,CFW,5,Easy,Low,Ready,None,Quick,capabilities/badusb.md
+UC-29,BLE,BLE Spam,Trigger nearby device popups,Advertise Sour-Apple/Swift-Pair spam; nuisance/novelty,Software,None,CFW,2,Easy,Medium,Ready,None,Instant,bluetooth/ble-spam.md
+UC-30,BLE,FindMy Flipper,Track a lost Flipper,Emulate Apple FindMy so the device is locatable,Software,None,CFW,5,Easy,Low,Ready,None,Quick,bluetooth/airtag-tracker-detection.md
+UC-31,WiFi,Wi-Fi scan/recon,Inventory nearby APs/clients,Scan and list access points and stations,Hardware,ESP32-Marauder,n/a,6,Easy,Medium,Ready,None,Quick,wifi/recon-and-attacks.md
+UC-32,WiFi,Sniff to PCAP,Capture Wi-Fi traffic for analysis,Sniff frames; save PCAP to the board's microSD,Hardware,ESP32-Marauder+SD,n/a,6,Medium,Medium,Ready,None,Quick,wifi/recon-and-attacks.md
+UC-33,WiFi,WPA handshake/PMKID capture,Test your Wi-Fi password strength,Capture handshake/PMKID; crack offline elsewhere,Hardware,ESP32-Marauder,n/a,6,Medium,High,Ready,None,Setup,wifi/wpa-handshake-pmkid.md
+UC-34,WiFi,Deauthentication (authorized),Disconnect clients in a test,Deauth on your own network for testing,Hardware,ESP32-Marauder,n/a,5,Easy,High,Ready,None,Quick,wifi/deauth.md
+UC-35,WiFi,Beacon/probe/SSID spam,Flood SSIDs/probes,Broadcast many fake SSIDs/probes; nuisance/testing,Hardware,ESP32-Marauder,n/a,3,Easy,High,Ready,None,Quick,wifi/recon-and-attacks.md
+UC-36,WiFi,Evil Portal,Captive-portal phishing drill,Host a fake captive portal to harvest test creds,Hardware,ESP32-Marauder,n/a,4,Medium,High,Ready,None,Setup,wifi/evil-portal.md
+UC-37,WiFi,Channel/signal analyzer,Survey Wi-Fi spectrum,Analyze channels/signal for a site survey,Hardware,ESP32-Marauder,n/a,5,Easy,Low,Ready,None,Quick,wifi/recon-and-attacks.md
+UC-38,WiFi,Wardrive (log APs),Map Wi-Fi presence,Log APs while moving; NO coordinates without GPS,Hardware,ESP32-Marauder+SD,n/a,3,Medium,Medium,Ready,None,Quick,wifi/recon-and-attacks.md
+UC-39,BLE,BLE scan/sniff (Marauder),Recon nearby BLE devices,Scan/sniff BLE advertisements and devices,Hardware,ESP32-Marauder,n/a,5,Easy,Low,Ready,None,Quick,bluetooth/interception.md
+UC-40,Defensive,AirTag/tracker detection,Find trackers following you,Detect AirTags/BLE trackers (anti-stalking),Hardware,ESP32-Marauder,n/a,6,Easy,Low,Ready,None,Quick,bluetooth/airtag-tracker-detection.md
+UC-41,Defensive,Bluetooth skimmer detection,Spot card skimmers,Detect HC-05/06 BT modules common in pump/ATM skimmers,Hardware,ESP32-Marauder,n/a,6,Easy,Low,Ready,None,Quick,topics/security-pentest.md
+UC-42,GPIO,USB-UART/SPI/I2C bridge,Talk to other electronics,Use the Flipper as a serial/SPI/I2C bridge/console,Hybrid,GPIO-wiring,OFW,6,Medium,Low,Ready,None,Setup,topics/tinkering.md
+UC-43,GPIO,SWD debug another MCU,Flash/debug ARM targets,SWD via DAP/Black Magic to debug other microcontrollers,Hybrid,GPIO-wiring,OFW,5,Hard,Low,Ready,None,Setup,topics/tinkering.md
+UC-44,GPIO,Logic analyzer,Reverse-engineer slow buses,Capture digital signals (SUMP/sigrok) on GPIO,Hybrid,GPIO-wiring,OFW,5,Medium,Low,Ready,None,Setup,topics/tinkering.md
+UC-45,GPIO,GPIO sensor reading,Read environmental sensors,Read I2C/1-Wire sensors (BME280/DHT/DS18B20),Hybrid,GPIO-wiring,OFW,5,Medium,Low,Ready,None,Setup,topics/tinkering.md
+UC-46,GPIO,Relay/servo/LED control,Drive simple actuators,"Control relays, servos, LEDs from GPIO",Hybrid,GPIO-wiring,OFW,4,Medium,Low,Ready,None,Setup,topics/tinkering.md
+UC-47,GPIO,Sentry Safe / e-safe opener,Open your own electronic safe,UART exploit opens certain Sentry/Master electronic safes,Hybrid,GPIO-wiring,OFW,4,Medium,Medium,Ready,None,Setup,topics/tinkering.md
+UC-48,Software,TOTP 2FA authenticator,Carry your 2FA codes,Flipper Authenticator stores TOTP/HOTP like Google Authenticator,Software,None,OFW,8,Easy,Low,Ready,None,Quick,topics/tinkering.md
+UC-49,Software,Games,Casual entertainment,Tetris/Minesweeper/Arkanoid/Flappy/DOOM-likes,Software,None,OFW,3,Easy,Low,Ready,None,Instant,resources/best-github-repos.md
+UC-50,Software,Mouse Jiggler,Keep a PC awake,Periodic HID mouse movement to prevent idle/lock,Software,None,OFW,5,Easy,Low,Ready,None,Instant,capabilities/badusb.md
+UC-51,Software,Utilities,Pocket tools,"Calculator, clock, unit converter, counters",Software,None,OFW,3,Easy,Low,Ready,None,Instant,resources/best-github-repos.md
+UC-52,Software,Build own FAP/JS apps,Create custom tools,Write C FAPs or on-device JavaScript automations,Software,None,CFW,6,Hard,Low,Ready,None,Project,topics/tinkering.md
+UC-53,Software,U2F/FIDO second factor,Hardware 2FA key,Use the Flipper as a U2F/FIDO authenticator,Hybrid,None,OFW,6,Easy,Low,Ready,None,Quick,01-architecture.md
+UC-54,Defensive,Detect Wi-Fi deauth attacks,Spot attacks on your net,Monitor for deauth floods against your own network,Hardware,ESP32-Marauder,n/a,5,Medium,Low,Ready,None,Quick,wifi/recon-and-attacks.md
+UC-55,Defensive,PCAP to Wireshark analysis,Understand captured traffic,Analyze Marauder PCAPs offline in Wireshark,Software,ESP32-Marauder+SD,n/a,5,Medium,Low,Ready,None,Setup,topics/security-pentest.md
+UC-56,Defensive,Audit own RF/cards,Find your weak points,Identify fixed-code remotes & weak fobs to upgrade,Hardware,None,OFW,6,Medium,Low,Ready,None,Setup,topics/security-pentest.md
+UC-57,WiFi,2.4GHz HID mousejacking,Inject into wireless HID,MouseJack vulnerable keyboards/mice (needs NRF24),Hardware,(need: NRF24),n/a,4,Medium,High,NeedAccessory,None,Setup,hardware/buying-guide.md
+UC-58,WiFi,Geo-wardriving / mapping,Map Wi-Fi with coordinates,Wardrive with GPS-tagged APs (needs GPS module),Hardware,(need: GPS),n/a,5,Medium,Medium,NeedAccessory,None,Setup,hardware/buying-guide.md
+UC-59,SubGHz,315/868/915 long-range,Extend other Sub-GHz bands,Long-range outside 433 (needs other-band CC1101),Hardware,(need: other-band module),CFW,5,Medium,Medium,NeedAccessory,None,Quick,hardware/buying-guide.md
+UC-60,WiFi,5GHz Wi-Fi testing,Test 5GHz networks,5GHz deauth/scan (needs ESP32-C5/C6 board),Hardware,(need: ESP32-C5/C6),n/a,4,Medium,High,NeedAccessory,None,Setup,hardware/buying-guide.md
+UC-61,RFID-LF,Pet/animal microchip read,Read FDX-B pet chips,134.2kHz FDX-B; Flipper LF is 125kHz -> cannot,Hardware,(need: 134.2kHz reader),n/a,3,Hard,Low,ByDesign-No,None,n/a,capabilities/nfc-rfid.md
+UC-62,SubGHz,Defeat rolling codes,Open modern fobs/gates,Rolling codes resist replay by design -> not possible,Hardware,None,CFW,1,Hard,High,ByDesign-No,None,n/a,theory/rolling-codes.md
+UC-63,NFC-HF,Clone/pay with EMV card,Duplicate a bank card,EMV crypto -> cannot clone or pay,Hardware,None,CFW,1,Hard,High,ByDesign-No,None,n/a,capabilities/nfc-rfid.md
+UC-64,BLE,BLE connection sniffing,Capture/decrypt a BLE connection,Follow hop sequence + decrypt; needs a real sniffer add-on,Hardware,(need: nRF52840/Sniffle),n/a,5,Hard,High,NeedAccessory,None,Setup,bluetooth/ble-sniffer-addon.md

@@ -1,0 +1,42 @@
+# --- secrets & runtime state (NEVER commit) ---
+*.token
+bled.token
+bled.sock
+bled.lock
+*.pid
+
+# --- device data / scratch (screen captures, BLE MAC, file transfers) ---
+*.png
+ble_*.bin
+ble_result.txt
+screen.png
+healthwatch.log
+healthwatch-last.json
+healthwatch.out
+healthwatch.err
+
+# --- the self-evolving local KB overlay (per-install; lives in ~/.flipper-ble-mcp) ---
+# (ignored here too, in case it's ever symlinked into the tree)
+kb-local/*
+!kb-local/README.md
+
+# --- built macOS app bundle (users build their own via app/build_app.sh) ---
+*.app/
+
+# --- python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- macOS / editors ---
+.DS_Store
+*.swp
+.idea/
+.vscode/

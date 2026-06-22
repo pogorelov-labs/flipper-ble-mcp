@@ -1,0 +1,99 @@
+# Flipper Zero — Research Knowledge Base
+
+> Structured research KB on the Flipper Zero — architecture, firmware, hardware/GPIO, cards/NFC, Wi-Fi & BLE, RF & security theory, scored use cases, and curated resources.
+
+This file is generated from per-doc frontmatter (70 docs). See CLAUDE.md for navigation conventions and the frontmatter schema.
+
+## Start here
+- [CLAUDE.md](CLAUDE.md): agent guide — how to navigate, frontmatter schema, house style
+- [README.md](README.md): human index + device context + conventions
+
+## Start here / Core
+- [use-cases-model.md](use-cases-model.md): Scored data model — schema + 1–10 real-use rubric + 63 use-cases in ranked score bands.
+- [01-architecture.md](01-architecture.md): Hardware block map, STM32WB MCU, radios, software stack, SD layout, and full capability map.
+- [legal-and-safety.md](legal-and-safety.md): Dual-use ground rules — RF-transmit, cloning, HID, EMV reality, and a responsible-use checklist.
+- [glossary.md](glossary.md): One-line definitions of every term used across the KB, each linking to its deep-dive.
+
+## Firmware
+- [firmware/README.md](firmware/README.md): Firmware comparison matrix, Xtreme to Momentum history, flashing/recovery, and legal/stability risks.
+- [firmware/migration-xtreme-to-momentum.md](firmware/migration-xtreme-to-momentum.md): Step-by-step — back up SD, flash Momentum, restore, re-enable add-ons, verify (frontier Stage 0).
+- [firmware/momentum.md](firmware/momentum.md): Feature-rich Xtreme successor — capabilities by domain plus an honest is-it-the-best verdict.
+- [firmware/official.md](firmware/official.md): Stock OFW from Flipper Devices — abilities, deliberate limits, and the sanctioned app catalog.
+- [firmware/roguemaster.md](firmware/roguemaster.md): Kitchen-sink, bleeding-edge custom firmware with the largest bundled app/game set and most crashes.
+- [firmware/unleashed.md](firmware/unleashed.md): Unlocked, stable, RF-focused custom firmware — the oldest OFW fork, favored for serious Sub-GHz work.
+
+## Hardware & GPIO
+- [hardware/README.md](hardware/README.md): GPIO pinout, ADC/PWM/buses, power limits, and the Flipper's internal-radio front-end hardware.
+- [hardware/esp32-firmware-comparison.md](hardware/esp32-firmware-comparison.md): Bruce vs Ghost ESP vs Marauder — which firmware to flash on an ESP32 Flipper backpack.
+- [hardware/esp32-marauder-module.md](hardware/esp32-marauder-module.md): The ESP32-WROOM Marauder backpack hardware — GPIO 9-18 mount (3V3), the freeze fix, BOOT/RST buttons, dual-SD, flashing.
+- [hardware/gpio-addons-current.md](hardware/gpio-addons-current.md): Current GPIO add-ons — DevBoard, VGM, Marauder/Ghost ESP, Mayhem, NRF24, CC1101, GPS, protoboards.
+- [hardware/buying-guide.md](hardware/buying-guide.md): Which GPIO add-on(s) to buy, by goal/persona, with a board-vs-persona comparison table.
+- [hardware/addons-explained.md](hardware/addons-explained.md): Plain-words use-cases + pros/cons for each Flipper GPIO add-on — GPS, NRF24, CC1101, BLE sniffer, thermal, geiger.
+- [hardware/gpio-addons-potential.md](hardware/gpio-addons-potential.md): DIY GPIO add-ons — I²C/SPI/UART sensors, displays, LoRa, BLE sniffer, logic analyzer, and design limits.
+
+## Capabilities (built-in feature deep-dives)
+- [capabilities/badusb.md](capabilities/badusb.md): HID keystroke injection over USB (and BLE on CFW) — Ducky Script, layouts, OS targets, and blue-team defenses. (UC-25, UC-26, UC-27, UC-28, UC-50)
+- [capabilities/ibutton.md](capabilities/ibutton.md): Dallas / Cyfral / Metakom contact "touch" keys over 1-Wire — read, emulate, and clone to writable blanks. (UC-24)
+- [capabilities/infrared.md](capabilities/infrared.md): Capture, store, and replay consumer IR; protocols, .ir format, universal remotes, and the Flipper-IRDB library. (UC-01, UC-02, UC-03)
+- [capabilities/nfc-rfid.md](capabilities/nfc-rfid.md): Overview of the two card radios — LF 125 kHz RFID and HF 13.56 MHz NFC; deep dives live in cards/. (UC-15, UC-16, UC-17, UC-18, UC-19, UC-20, UC-21, UC-22, UC-23, UC-61, UC-63)
+- [capabilities/sub-ghz.md](capabilities/sub-ghz.md): CC1101 sub-1-GHz radio — bands, modulation/presets, on-device workflows, .sub format, protocol decoders. (UC-04, UC-05, UC-06, UC-07, UC-08, UC-09, UC-10, UC-11, UC-12)
+
+## Cards, NFC & RFID (deep-research sub-domain)
+- [cards/README.md](cards/README.md): Hub: card taxonomy, security tiers, and the cards doc index (UC-15, UC-16, UC-17, UC-18, UC-19, UC-20, UC-21, UC-22, UC-23)
+- [cards/cloning-matrix.md](cards/cloning-matrix.md): What's cloneable + how, magic cards, and a blanks list
+- [cards/iclass-picopass.md](cards/iclass-picopass.md): iCLASS legacy vs SE/SEOS; the PicoPass app
+- [cards/lf-125khz.md](cards/lf-125khz.md): EM4100/HID Prox/Indala/AWID + T5577 cloning
+- [cards/mifare.md](cards/mifare.md): MIFARE Classic/Ultralight/NTAG/DESFire + Crypto1 attacks
+- [cards/nfc-theory.md](cards/nfc-theory.md): RFID/NFC physics + ISO 14443/15693/18092 protocols
+
+## Wi-Fi (ESP32 Marauder add-on)
+- [wifi/README.md](wifi/README.md): Hub: Wi-Fi capability map — which use-case lives in which doc. (UC-31, UC-32, UC-33, UC-34, UC-35, UC-36, UC-37, UC-38, UC-54)
+- [wifi/evil-portal.md](wifi/evil-portal.md): Rogue-AP captive-portal credential harvesting. (UC-36, UC-34)
+- [wifi/marauder-mcp-scan.md](wifi/marauder-mcp-scan.md): Agent-driven AP scan — launch Marauder over the BLE MCP, run scanap, read the full network list from the SD log. (UC-31)
+- [wifi/own-network-audit.md](wifi/own-network-audit.md): Runnable: audit your own PSK (capture, hcxtools, hashcat). (UC-33)
+- [wifi/deauth.md](wifi/deauth.md): Deauthentication: the 802.11 flaw and the PMF/802.11w defense. (UC-34, UC-33, UC-36, UC-54)
+- [wifi/recon-and-attacks.md](wifi/recon-and-attacks.md): Scan, sniff to PCAP, beacon spam, analyzer, wardrive, detect-deauth. (UC-31, UC-32, UC-35, UC-37, UC-38, UC-54)
+- [wifi/wpa-handshake-pmkid.md](wifi/wpa-handshake-pmkid.md): Capture the WPA 4-way handshake / PMKID and crack it offline with hashcat. (UC-33, UC-54)
+
+## Bluetooth / BLE
+- [bluetooth/README.md](bluetooth/README.md): Hub for Bluetooth on this rig — Classic vs BLE, and the BLE use-case map across the sub-domain docs. (UC-39, UC-29, UC-40, UC-30, UC-64, UC-41)
+- [bluetooth/airtag-tracker-detection.md](bluetooth/airtag-tracker-detection.md): How Find My works, anti-stalking tracker detection, rig limits, and FindMy Flipper as the inverse emulator. (UC-40, UC-30)
+- [bluetooth/ble-sniffer-addon.md](bluetooth/ble-sniffer-addon.md): Real BLE connection capture via nRF52840/nRF Sniffer or Sniffle, plus crackle for LE Legacy pairings. (UC-64)
+- [bluetooth/ble-spam.md](bluetooth/ble-spam.md): Advertising-flood pairing popups (Sour Apple/Fast Pair/Swift Pair); the iOS 17.2 story; nuisance, not a hack. (UC-29)
+- [bluetooth/classic.md](bluetooth/classic.md): Bluetooth Classic (BR/EDR) attacks — KNOB, BIAS, BlueBorne — and why this rig can't touch them.
+- [bluetooth/interception.md](bluetooth/interception.md): Interception reality — advertising vs connection sniffing, pairing crypto, and what this rig can/can't do. (UC-39, UC-40, UC-41, UC-29, UC-30)
+
+## Theory
+- [theory/relay-attacks.md](theory/relay-attacks.md): The attack class that beats correct crypto — PKES/BLE/NFC relay; UWB/distance-bounding defense
+- [theory/rolling-codes.md](theory/rolling-codes.md): KeeLoq internals, RollJam/RollBack, cryptanalysis, and defenses
+- [theory/human-layer.md](theory/human-layer.md): The gap no patch closes — phishing, BadUSB social-eng, NFC/QR baiting; passkeys as the fix (UC-19, UC-25, UC-26, UC-27, UC-36)
+
+## Topics
+- [topics/ai-flipper-possibilities.md](topics/ai-flipper-possibilities.md): What an AI agent driving the Flipper unlocks, the hardware/crypto ceiling, and injection→hardware risk.
+- [topics/tinkering.md](topics/tinkering.md): Maker/electronics projects, FAP/ufbt app dev, on-device JavaScript, and asset packs.
+- [topics/security-pentest.md](topics/security-pentest.md): Honest red-team framing — capability-vs-tool matrix, methodology, ROE checklist, remediation.
+- [topics/subghz-region-lock.md](topics/subghz-region-lock.md): How Flipper's Sub-GHz region provisioning works, why "Missing region file" blocks TX, and the fix. (UC-04, UC-05, UC-06, UC-07, UC-08, UC-09, UC-10, UC-11, UC-12)
+- [topics/use-cases.md](topics/use-cases.md): Legitimate uses & project ideas organized by capability, with a starter-projects table.
+- [topics/remaining-gaps.md](topics/remaining-gaps.md): Where capability still beats modern defenses in 2026 — deployment inertia, relay attacks, IoT floor, FM11RF08S.
+
+## Resources
+- [resources/best-github-repos.md](resources/best-github-repos.md): Curated GitHub repos by category, with maintenance flags
+- [resources/community-and-video.md](resources/community-and-video.md): Discord/Reddit/forums + vetted YouTube creators
+- [resources/flipper-ble-control.md](resources/flipper-ble-control.md): Wireless Flipper control SOLVED — read/see/drive/launch/file-read over BLE via the flipper-ble MCP server.
+- [resources/cool-projects.md](resources/cool-projects.md): Fun/novel projects — FlipperHTTP web apps, games, VGM DOOM, MagSpoof, Home Assistant
+- [resources/flipper-mcp-and-ai.md](resources/flipper-mcp-and-ai.md): Drive the Flipper from Claude — MCP servers, AgentFlipper, Mac/USB setup, AI-control risks
+- [resources/flipper-control-playbook.md](resources/flipper-control-playbook.md): How an AI agent should drive the Flipper via the MCP toolkit — data-first algorithm, menu maps, app-entry recipes, conventions.
+- [resources/flipper-control-mcp-server.md](resources/flipper-control-mcp-server.md): Gated control MCP server (Stage 3) — 14 tools (input/apps/LED/GPIO/IR+SubGHz-TX/writes + screenshot) over USB, each approved.
+- [resources/flipper-healthwatch.md](resources/flipper-healthwatch.md): Gated, default-off launchd job that polls the Flipper read-only 3×/day (battery/storage/clock/firmware) and notifies on anomalies.
+- [resources/flipper-read-mcp-server.md](resources/flipper-read-mcp-server.md): The read-only MCP server we built for this rig — 14 native mcp__flipper__* device-read tools over USB, one allowlist.
+- [resources/github-landscape.md](resources/github-landscape.md): Leaderboard + people — top repos by stars, devs/orgs to follow, the ESP32 scene
+- [resources/apps-badusb-automotive-misc.md](resources/apps-badusb-automotive-misc.md): Runbook for the BadUSB/HID, CAN/automotive, physical-access, crypto and misc security FAPs on my Momentum rig. (UC-25, UC-26, UC-27, UC-28, UC-47, UC-48, UC-50, UC-53)
+- [resources/apps-rfid-ibutton-infrared.md](resources/apps-rfid-ibutton-infrared.md): Per-app runbook for the LF RFID (125 kHz), iButton/1-Wire, and Infrared apps on the owner's maxed Momentum rig. (UC-01, UC-02, UC-03, UC-15, UC-24)
+- [resources/apps-nfc.md](resources/apps-nfc.md): Per-app reference for every 13.56 MHz NFC .fap on my Momentum rig — what it does, options, gotchas, sources. (UC-16, UC-17, UC-18, UC-19, UC-20, UC-21, UC-22, UC-23)
+- [resources/learning-and-docs.md](resources/learning-and-docs.md): Docs, cheat-sheets, and deep RF+NFC learning material by level
+- [resources/notable-apps-and-data.md](resources/notable-apps-and-data.md): Deeper cut — pyFlipper scripting, sensor/utility apps, data/dumps, asset packs, 3D
+- [resources/mcp-setup-claude-code.md](resources/mcp-setup-claude-code.md): Install busse MCP, add to Claude Code over USB, scope it read-only with gating — first safe AI↔device milestone.
+- [resources/apps-subghz.md](resources/apps-subghz.md): Per-app reference for the Sub-GHz/RF .faps on this Momentum rig — what each does, key options, use-cases, gotchas, sources. (UC-04, UC-05, UC-06, UC-07, UC-08, UC-09, UC-10, UC-11, UC-12, UC-13, UC-14)
+- [resources/subghz-device-repos.md](resources/subghz-device-repos.md): Device-specific Sub-GHz repos and .sub collections (TouchTunes, gates, Tesla, sensors)
+- [resources/tools-and-software.md](resources/tools-and-software.md): qFlipper, Flipper Lab, flashers, and an SD-backup checklist
+- [resources/apps-esp-ble-nrf24.md](resources/apps-esp-ble-nrf24.md): Per-app runbook for the ESP32 / BLE / NRF24 companion FAPs on my Momentum rig — what each does, settings, hardware, sources. (UC-29, UC-30, UC-31, UC-32, UC-33, UC-34, UC-35, UC-36, UC-37, UC-38, UC-39, UC-40, UC-57)

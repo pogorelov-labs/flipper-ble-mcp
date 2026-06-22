@@ -1,0 +1,19 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.pogorelov-labs/flipper-ble-mcp",
+  "title": "Flipper Zero BLE Control",
+  "description": "Wirelessly control a Flipper Zero over Bluetooth LE from Claude",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/pogorelov-labs/flipper-ble-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "flipper-ble-mcp",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" }
+    }
+  ]
+}
