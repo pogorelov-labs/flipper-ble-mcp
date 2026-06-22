@@ -32,6 +32,7 @@ CLI:
 
 Exit code is always 0 (so launchd never thinks it crashed and throttles/relaunches it).
 """
+
 import datetime as dt
 import json
 import os
@@ -41,26 +42,27 @@ import subprocess
 import sys
 import time
 
-HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp"); os.makedirs(HOME, exist_ok=True)
+HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp")
+os.makedirs(HOME, exist_ok=True)
 APP = f"{HOME}/FlipperBLE.app"
 SOCK = f"{HOME}/bled.sock"
 TOKEN_FILE = f"{HOME}/bled.token"
-LOG = f"{HOME}/healthwatch.log"          # JSONL: one snapshot per line
-LAST = f"{HOME}/healthwatch-last.json"   # most-recent snapshot (for diffing firmware/MAC)
+LOG = f"{HOME}/healthwatch.log"  # JSONL: one snapshot per line
+LAST = f"{HOME}/healthwatch-last.json"  # most-recent snapshot (for diffing firmware/MAC)
 SELF = os.path.abspath(__file__)
 
 LABEL = "com.flipper-ble-mcp.healthwatch"
 PLIST = os.path.expanduser(f"~/Library/LaunchAgents/{LABEL}.plist")
-SCHEDULE = [(9, 0), (15, 0), (21, 0)]    # 3×/day, local time
-PY = "/usr/bin/python3"                   # stdlib-only script → system python is fine + PATH-independent
+SCHEDULE = [(9, 0), (15, 0), (21, 0)]  # 3×/day, local time
+PY = "/usr/bin/python3"  # stdlib-only script → system python is fine + PATH-independent
 
 # ---- thresholds (edit here) -------------------------------------------------
-BATTERY_LOW_PCT = 15        # alert when discharging AND charge_level <= this
-BATTERY_HEALTH_LOW = 80     # warn when battery_health <= this (cell aging)
-BATTERY_TEMP_HI = 45        # warn when battery_temp °C >= this
-BATTERY_TEMP_LO = 0         # warn when battery_temp °C <= this
-STORAGE_FREE_LOW_PCT = 10   # warn when /ext free% <= this
-RTC_DRIFT_SEC = 120         # warn when |Flipper clock - Mac clock| > this
+BATTERY_LOW_PCT = 15  # alert when discharging AND charge_level <= this
+BATTERY_HEALTH_LOW = 80  # warn when battery_health <= this (cell aging)
+BATTERY_TEMP_HI = 45  # warn when battery_temp °C >= this
+BATTERY_TEMP_LO = 0  # warn when battery_temp °C <= this
+STORAGE_FREE_LOW_PCT = 10  # warn when /ext free% <= this
+RTC_DRIFT_SEC = 120  # warn when |Flipper clock - Mac clock| > this
 
 # ---- the read-only allowlist — the structural TX/write guard ---------------
 READONLY_CMDS = {"power", "diskinfo", "getdt", "info", "ping", "health", "selftest"}
@@ -98,8 +100,7 @@ def _ensure_daemon():
     tok = _read_token()
     if tok and _daemon_send("health", [], 3, tok) is not None:
         return tok
-    subprocess.Popen(["open", APP, "--args", "daemon"],
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen(["open", APP, "--args", "daemon"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for _ in range(25):
         time.sleep(1)
         tok = _read_token()
@@ -129,8 +130,7 @@ def send(cmd, args=(), timeout=80, _retry=True):
 # ---- parsers ----------------------------------------------------------------
 def _kv(text):
     """Parse 'k = v' lines (device_info / power_info) into a dict."""
-    return {k.strip(): v.strip() for k, v in
-            (ln.split(" = ", 1) for ln in text.splitlines() if " = " in ln)}
+    return {k.strip(): v.strip() for k, v in (ln.split(" = ", 1) for ln in text.splitlines() if " = " in ln)}
 
 
 def _to_int(v):
@@ -142,8 +142,14 @@ def _to_int(v):
 
 def collect():
     """Build a read-only health snapshot. Leads with ping as the reachability gate."""
-    snap = {"ts": dt.datetime.now().isoformat(timespec="seconds"), "reachable": False,
-            "battery": {}, "storage_ext": {}, "rtc": {}, "device": {}}
+    snap = {
+        "ts": dt.datetime.now().isoformat(timespec="seconds"),
+        "reachable": False,
+        "battery": {},
+        "storage_ext": {},
+        "rtc": {},
+        "device": {},
+    }
 
     p = send("ping", timeout=80)
     if not p.get("ok") or "PING_OK" not in (p.get("text") or ""):
@@ -168,8 +174,11 @@ def collect():
     if di.get("ok"):
         m = re.search(r"free (\d+) / total (\d+) bytes \((\d+)% free\)", di.get("text", ""))
         if m:
-            snap["storage_ext"] = {"free": int(m.group(1)), "total": int(m.group(2)),
-                                   "pct_free": int(m.group(3))}
+            snap["storage_ext"] = {
+                "free": int(m.group(1)),
+                "total": int(m.group(2)),
+                "pct_free": int(m.group(3)),
+            }
 
     gd = send("getdt", timeout=40)
     if gd.get("ok"):
@@ -202,13 +211,22 @@ def evaluate(snap, prev):
     Notifications fire for everything except INFO."""
     out = []
     if not snap.get("reachable"):
-        out.append(("WARN", f"Flipper unreachable over BLE — off, out of range, dead battery, "
-                            f"or phone holding the radio ({snap.get('unreachable_reason', '')})".strip()))
+        out.append(
+            (
+                "WARN",
+                f"Flipper unreachable over BLE — off, out of range, dead battery, "
+                f"or phone holding the radio ({snap.get('unreachable_reason', '')})".strip(),
+            )
+        )
         return out
 
     b = snap.get("battery", {})
-    lvl, state, health, temp = (b.get("charge_level"), (b.get("charge_state") or ""),
-                                b.get("battery_health"), b.get("battery_temp"))
+    lvl, state, health, temp = (
+        b.get("charge_level"),
+        (b.get("charge_state") or ""),
+        b.get("battery_health"),
+        b.get("battery_temp"),
+    )
     discharging = "discharg" in state.lower()
     if lvl is not None and discharging and lvl <= BATTERY_LOW_PCT:
         out.append(("ALERT", f"Battery low: {lvl}% and discharging — charge the Flipper"))
@@ -228,10 +246,18 @@ def evaluate(snap, prev):
     # diff vs previous snapshot — firmware / device-identity changes are tamper/update signals
     pdev = (prev or {}).get("device", {})
     ndev = snap.get("device", {})
-    if pdev.get("firmware_commit") and ndev.get("firmware_commit") and \
-            pdev["firmware_commit"] != ndev["firmware_commit"]:
-        out.append(("NOTICE", f"Firmware changed: {pdev.get('firmware_version')}@{pdev['firmware_commit']} "
-                              f"→ {ndev.get('firmware_version')}@{ndev['firmware_commit']}"))
+    if (
+        pdev.get("firmware_commit")
+        and ndev.get("firmware_commit")
+        and pdev["firmware_commit"] != ndev["firmware_commit"]
+    ):
+        out.append(
+            (
+                "NOTICE",
+                f"Firmware changed: {pdev.get('firmware_version')}@{pdev['firmware_commit']} "
+                f"→ {ndev.get('firmware_version')}@{ndev['firmware_commit']}",
+            )
+        )
     if pdev.get("ble_mac") and ndev.get("ble_mac") and pdev["ble_mac"] != ndev["ble_mac"]:
         out.append(("NOTICE", f"BLE MAC changed {pdev['ble_mac']} → {ndev['ble_mac']} (different device?)"))
     return out
@@ -245,11 +271,13 @@ def notify(alerts):
     worst = "ALERT" if any(l == "ALERT" for l, _ in alerts) else "WARN"
     body = "; ".join(m for _, m in alerts).replace('"', "'").replace("\\", "")
     sub = f"{len(alerts)} item(s) — {worst}"
-    script = (f'display notification "{body[:240]}" with title "Flipper health-watch" '
-              f'subtitle "{sub}"' + (' sound name "Basso"' if worst == "ALERT" else ""))
+    script = f'display notification "{body[:240]}" with title "Flipper health-watch" subtitle "{sub}"' + (
+        ' sound name "Basso"' if worst == "ALERT" else ""
+    )
     try:
-        subprocess.run(["osascript", "-e", script], timeout=10,
-                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        subprocess.run(
+            ["osascript", "-e", script], timeout=10, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
     except Exception:
         pass
 
@@ -280,9 +308,11 @@ def do_run(quiet=False):
         print(f"{snap['ts']}  UNREACHABLE  {snap.get('unreachable_reason', '')}")
     else:
         b, st, rtc = snap["battery"], snap["storage_ext"], snap["rtc"]
-        print(f"{snap['ts']}  battery {b.get('charge_level')}% ({b.get('charge_state')}) "
-              f"health {b.get('battery_health')}%  SD {st.get('pct_free')}% free  "
-              f"clock-drift {rtc.get('drift_sec')}s  alerts={len(alerts)}")
+        print(
+            f"{snap['ts']}  battery {b.get('charge_level')}% ({b.get('charge_state')}) "
+            f"health {b.get('battery_health')}%  SD {st.get('pct_free')}% free  "
+            f"clock-drift {rtc.get('drift_sec')}s  alerts={len(alerts)}"
+        )
         for lvl, m in alerts:
             print(f"    [{lvl}] {m}")
 
@@ -290,8 +320,9 @@ def do_run(quiet=False):
 # ---- LaunchAgent management -------------------------------------------------
 def _plist_xml():
     cal = "".join(
-        f"    <dict><key>Hour</key><integer>{h}</integer>"
-        f"<key>Minute</key><integer>{m}</integer></dict>\n" for h, m in SCHEDULE)
+        f"    <dict><key>Hour</key><integer>{h}</integer><key>Minute</key><integer>{m}</integer></dict>\n"
+        for h, m in SCHEDULE
+    )
     return f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -324,8 +355,7 @@ def do_install():
 
 
 def _is_enabled():
-    r = subprocess.run(["launchctl", "print", f"gui/{os.getuid()}/{LABEL}"],
-                       capture_output=True, text=True)
+    r = subprocess.run(["launchctl", "print", f"gui/{os.getuid()}/{LABEL}"], capture_output=True, text=True)
     return r.returncode == 0
 
 
@@ -361,9 +391,11 @@ def do_status():
     if last:
         if last.get("reachable"):
             b, st, rtc = last.get("battery", {}), last.get("storage_ext", {}), last.get("rtc", {})
-            lines.append(f"last run {last.get('ts')}: battery {b.get('charge_level')}% "
-                         f"({b.get('charge_state')}), SD {st.get('pct_free')}% free, "
-                         f"clock-drift {rtc.get('drift_sec')}s, alerts={len(last.get('alerts', []))}")
+            lines.append(
+                f"last run {last.get('ts')}: battery {b.get('charge_level')}% "
+                f"({b.get('charge_state')}), SD {st.get('pct_free')}% free, "
+                f"clock-drift {rtc.get('drift_sec')}s, alerts={len(last.get('alerts', []))}"
+            )
         else:
             lines.append(f"last run {last.get('ts')}: UNREACHABLE — {last.get('unreachable_reason', '')}")
         for lvl, m in last.get("alerts", []):

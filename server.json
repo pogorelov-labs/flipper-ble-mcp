@@ -11,8 +11,10 @@
   "packages": [
     {
       "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
       "identifier": "flipper-ble-mcp",
       "version": "0.1.0",
+      "runtimeHint": "uvx",
       "transport": { "type": "stdio" }
     }
   ]

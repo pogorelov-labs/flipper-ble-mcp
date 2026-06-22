@@ -26,20 +26,22 @@ central at a time). If a call returns "device not found", disconnect the phone's
 app (or toggle the Flipper's Bluetooth) and retry. Transient not-advertising is
 auto-retried once.
 """
+
 import os
 import subprocess
 import time
 
 from mcp.server.fastmcp import FastMCP, Image
 
-HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp"); os.makedirs(HOME, exist_ok=True)
+HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp")
+os.makedirs(HOME, exist_ok=True)
 APP = f"{HOME}/FlipperBLE.app"
 RESULT = f"{HOME}/ble_result.txt"
 PNG = f"{HOME}/ble_screen.png"
 FILEBIN = f"{HOME}/ble_file.bin"
 UPLOAD = f"{HOME}/ble_upload.bin"
 HEALTHWATCH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "flipper_healthwatch.py")
-PY = "/usr/bin/python3"                          # stdlib-only watcher → system python, PATH-independent
+PY = "/usr/bin/python3"  # stdlib-only watcher → system python, PATH-independent
 
 mcp = FastMCP("flipper-ble")
 
@@ -88,8 +90,7 @@ def _ensure_daemon():
     tok = _read_token()
     if tok and _daemon_send("health", [], 3, tok) is not None:
         return tok
-    subprocess.Popen(["open", APP, "--args", "daemon"],
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.Popen(["open", APP, "--args", "daemon"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     for _ in range(25):  # ~25s for app launch + socket bind + token file
         time.sleep(1)
         tok = _read_token()
@@ -117,9 +118,11 @@ def _run_worker(args, want_png=False, timeout=90, _retry=True):
 
 
 def _not_found_hint(text: str) -> str:
-    return (f"{text}\n\n↳ Flipper not reachable over BLE. It's likely connected to your "
-            f"phone (one BLE central at a time) or asleep. Disconnect the phone's Flipper "
-            f"app (or toggle the Flipper's Bluetooth) and retry. Use `scan` to check.")
+    return (
+        f"{text}\n\n↳ Flipper not reachable over BLE. It's likely connected to your "
+        f"phone (one BLE central at a time) or asleep. Disconnect the phone's Flipper "
+        f"app (or toggle the Flipper's Bluetooth) and retry. Use `scan` to check."
+    )
 
 
 def _text_call(args, timeout=45) -> str:
@@ -212,8 +215,10 @@ def scan() -> str:
     for line in text.splitlines():
         if "FLIPPER_FOUND" in line:
             return f"✅ Flipper is advertising and reachable over BLE:\n{line}"
-    return ("❌ Flipper not found advertising over BLE. It may be connected to your phone "
-            "(disconnect the Flipper app there) or asleep. Then retry.")
+    return (
+        "❌ Flipper not found advertising over BLE. It may be connected to your phone "
+        "(disconnect the Flipper app there) or asleep. Then retry."
+    )
 
 
 # ---- read / observe ---------------------------------------------------------
@@ -224,8 +229,7 @@ def device_info() -> dict:
     text, _ = _run_worker(["info"], timeout=60)
     if "device not found" in text:
         return {"error": _not_found_hint(text)}
-    d = {k.strip(): v.strip() for k, v in
-         (ln.split(" = ", 1) for ln in text.splitlines() if " = " in ln)}
+    d = {k.strip(): v.strip() for k, v in (ln.split(" = ", 1) for ln in text.splitlines() if " = " in ln)}
     return d or {"error": text or "(no output)"}
 
 
@@ -336,8 +340,7 @@ def power_info() -> dict:
     text, _ = _run_worker(["power"])
     if "device not found" in text:
         return {"error": _not_found_hint(text)}
-    d = {k.strip(): v.strip() for k, v in
-         (ln.split(" = ", 1) for ln in text.splitlines() if " = " in ln)}
+    d = {k.strip(): v.strip() for k, v in (ln.split(" = ", 1) for ln in text.splitlines() if " = " in ln)}
     return d or {"error": text or "(no output)"}
 
 
@@ -576,7 +579,7 @@ def run_badusb(path: str, content: str = ""):
         return launch
     if isinstance(launch, str) and "OK" not in launch:
         return f"launch failed (app name 'Bad USB'? file at {path}?): {launch}"
-    return press("ok", then_screenshot=True)   # start the payload + capture the screen
+    return press("ok", then_screenshot=True)  # start the payload + capture the screen
 
 
 @mcp.tool()
@@ -608,8 +611,15 @@ def healthwatch(action: str = "status") -> str:
       'off'  — disable it (back to default-off).
       'run'  — run ONE read-only health check right now and return the summary.
     The job is structurally incapable of transmit/write (hardcoded read-only command allowlist)."""
-    sub = {"status": "status", "on": "enable", "enable": "enable", "off": "disable",
-           "disable": "disable", "run": "run", "check": "run"}.get((action or "status").lower().strip())
+    sub = {
+        "status": "status",
+        "on": "enable",
+        "enable": "enable",
+        "off": "disable",
+        "disable": "disable",
+        "run": "run",
+        "check": "run",
+    }.get((action or "status").lower().strip())
     if not sub:
         return f"bad action {action!r}; use status | on | off | run"
     try:
@@ -622,9 +632,26 @@ def healthwatch(action: str = "status") -> str:
 # ---- annotate tools (read-only vs destructive) for the client approval UI ---
 from mcp.types import ToolAnnotations as _TA  # noqa: E402
 
-_RO = {"scan", "playbook", "device_info", "power_info", "ping", "get_datetime", "desktop_is_locked",
-       "app_lock_status", "screenshot", "storage_list", "storage_read", "storage_stat",
-       "storage_info", "storage_md5", "app_get_error", "gpio_read", "selftest", "read_latest"}
+_RO = {
+    "scan",
+    "playbook",
+    "device_info",
+    "power_info",
+    "ping",
+    "get_datetime",
+    "desktop_is_locked",
+    "app_lock_status",
+    "screenshot",
+    "storage_list",
+    "storage_read",
+    "storage_stat",
+    "storage_info",
+    "storage_md5",
+    "app_get_error",
+    "gpio_read",
+    "selftest",
+    "read_latest",
+}
 _DESTRUCTIVE = {"storage_delete", "transmit_subghz", "transmit_infrared", "reboot", "run_badusb"}
 for _n, _t in mcp._tool_manager._tools.items():
     if _n in _RO:

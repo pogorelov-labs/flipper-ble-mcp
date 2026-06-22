@@ -3,6 +3,7 @@
 Hardware-free: only imports the stdlib-only health-watch module and exercises its command
 allowlist guard — no BLE, no daemon, runs anywhere (CI included).
 """
+
 import pytest
 
 from flipper_ble_mcp import flipper_healthwatch as hw

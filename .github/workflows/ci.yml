@@ -5,20 +5,42 @@ on:
   pull_request:
 
 jobs:
-  lint-test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install ruff pytest
-      - name: Syntax check
-        run: python -m py_compile src/flipper_ble_mcp/*.py
-      - name: Lint (critical rules)
-        run: ruff check src/ --select E9,F63,F7,F82
-      - name: Tests (hardware-free)
-        run: PYTHONPATH=src python -m pytest -q tests/
+      - run: pip install ruff==0.15.18
+      - run: ruff check src tests
+      - run: ruff format --check src tests
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - run: pip install pytest pytest-cov
+      - run: PYTHONPATH=src pytest --cov --cov-report=term-missing
+
+  install-smoke:
+    # The package is macOS-only at runtime; this validates that it installs and imports there.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e .
+      - name: Import modules (validates packaging + deps resolve on macOS)
+        run: python -c "import flipper_ble_mcp, flipper_ble_mcp.server, flipper_ble_mcp.ble_worker, flipper_ble_mcp.flipper_healthwatch; print('import OK')"
 
   kb-index:
     runs-on: ubuntu-latest
@@ -29,7 +51,6 @@ jobs:
           python-version: "3.11"
       - name: KB index is up to date
         run: |
-          cd .
           python3 build-kb-index.py
           git diff --exit-code -- llms.txt llms-full.txt uc-index.json README.md \
             || (echo "::error::KB index stale — run: python3 build-kb-index.py" && exit 1)

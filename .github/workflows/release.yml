@@ -1,0 +1,54 @@
+name: Release
+
+# Tag a release to trigger:  git tag v0.1.0 && git push --tags
+# One-time setup required first: add a PyPI "pending publisher" for this repo + the `pypi`
+# environment (https://docs.pypi.org/trusted-publishers/). No API tokens are stored anywhere.
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install build
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  pypi:
+    needs: [build]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/flipper-ble-mcp
+    permissions:
+      id-token: write          # OIDC Trusted Publishing — no stored token
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
+
+  mcp-registry:
+    needs: [pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write          # OIDC auth to the MCP registry (namespace io.github.pogorelov-labs/*)
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+      - name: Authenticate (GitHub OIDC)
+        run: ./mcp-publisher login github-oidc
+      - name: Publish server.json to the MCP registry
+        run: ./mcp-publisher publish

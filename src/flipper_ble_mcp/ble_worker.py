@@ -1,14 +1,22 @@
 #!/usr/bin/env python3
 """BLE worker inside FlipperBLE.app. RPC over BLE done right:
-  - bleak event loop on the MAIN thread (so CoreBluetooth notifications fire),
-  - notification_discriminator on subscribes (macOS read/notify share a callback),
-  - FlipperProto (sync) runs in a WORKER thread; its read() drains the notify buffer,
-    its write() is marshalled back to the main loop.
+- bleak event loop on the MAIN thread (so CoreBluetooth notifications fire),
+- notification_discriminator on subscribes (macOS read/notify share a callback),
+- FlipperProto (sync) runs in a WORKER thread; its read() drains the notify buffer,
+  its write() is marshalled back to the main loop.
 """
-import sys, asyncio, threading, time, os; _HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp"); os.makedirs(_HOME, exist_ok=True)
 
-RX = "19ed82ae-ed21-4c9d-4145-228e61fe0000"   # indicate: Flipper -> host (data)
-TX = "19ed82ae-ed21-4c9d-4145-228e62fe0000"   # write:    host -> Flipper (data)
+import asyncio
+import os
+import sys
+import threading
+import time
+
+_HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp")
+os.makedirs(_HOME, exist_ok=True)
+
+RX = "19ed82ae-ed21-4c9d-4145-228e61fe0000"  # indicate: Flipper -> host (data)
+TX = "19ed82ae-ed21-4c9d-4145-228e62fe0000"  # write:    host -> Flipper (data)
 FLOW = "19ed82ae-ed21-4c9d-4145-228e63fe0000"
 STATUS = "19ed82ae-ed21-4c9d-4145-228e64fe0000"
 ADDR = ""  # per-host CoreBluetooth UUID, discovered at runtime
@@ -23,11 +31,12 @@ async def _find_device(timeout=10):
     Flipper is seen (matches by address OR name). Beats discover() — which always waits the
     full timeout — and find_device_by_address, which is flaky on macOS CoreBluetooth."""
     from bleak import BleakScanner
+
     found = {}
     ev = asyncio.Event()
 
     def _cb(d, adv):
-        n = (d.name or adv.local_name or "")
+        n = d.name or adv.local_name or ""
         if d.address == ADDR or "flip" in n.lower():
             found["d"] = d
             ev.set()
@@ -47,8 +56,8 @@ async def _find_device(timeout=10):
 
 
 # ---- shared RPC building blocks ---------------------------------------------
-SCREEN_REQ = bytes.fromhex("050801a20100")   # gui_start_screen_stream_request
-FB_MARK = bytes.fromhex("0a8008")            # ScreenFrame.data: field1, wire2, varint len 1024
+SCREEN_REQ = bytes.fromhex("050801a20100")  # gui_start_screen_stream_request
+FB_MARK = bytes.fromhex("0a8008")  # ScreenFrame.data: field1, wire2, varint len 1024
 
 
 def _frame(body: bytes) -> bytes:
@@ -68,6 +77,7 @@ def _input_frames(plan):
     """plan: list of (button, TYPE). Returns framed gui_send_input_event_request bytes,
     built via the protobuf lib (zero hand-encoding risk)."""
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2, gui_pb2
+
     frames = []
     for btn, itype in plan:
         m = flipper_pb2.Main()
@@ -82,6 +92,7 @@ def _fb_to_png(fb: bytes, path: str):
     """Decode the 1024-byte 128x64 8-page framebuffer -> 6x PNG."""
     import numpy as np
     from PIL import Image
+
     W, H = 128, 64
     arr = np.zeros((H, W), "uint8")
     for page in range(8):
@@ -115,6 +126,7 @@ def _make_proto(ser):
 def run_rpc(work, timeout=25):
     """bleak loop on main thread + FlipperProto in a worker thread. Returns work(proto)."""
     from bleak import BleakClient
+
     buf = bytearray()
     lock = threading.Lock()
     out = {}
@@ -129,6 +141,7 @@ def run_rpc(work, timeout=25):
                 log("[rx61]", len(b), b.hex()[:60])
                 with lock:
                     buf.extend(b)
+
             await client.start_notify(RX, on_rx, cb=disc)
             await client.start_notify(FLOW, lambda _c, d: log("[flow63]", bytes(d).hex()[:40]), cb=disc)
             await client.start_notify(STATUS, lambda _c, d: log("[status64]", bytes(d).hex()[:40]), cb=disc)
@@ -166,7 +179,8 @@ def run_rpc(work, timeout=25):
                 def write(self, data):
                     log("[write tx62]", len(data), bytes(data).hex()[:40], "(no-response)")
                     asyncio.run_coroutine_threadsafe(
-                        client.write_gatt_char(TX, bytes(data), response=False), loop).result(timeout=10)
+                        client.write_gatt_char(TX, bytes(data), response=False), loop
+                    ).result(timeout=10)
                     return len(data)
 
                 def flush(self):
@@ -187,6 +201,7 @@ def run_rpc(work, timeout=25):
                 return work(proto)
 
             out["res"] = await asyncio.wait_for(loop.run_in_executor(None, blocking), timeout=timeout)
+
     asyncio.run(orchestrate())
     return out.get("res")
 
@@ -195,6 +210,7 @@ def do_ctl():
     """Decisive: single-thread harness (known to deliver notifications) + no-response writes
     + real device_info request. Compare WITH vs WITHOUT start_rpc_session."""
     from bleak import BleakClient
+
     REQ = bytes.fromhex("050801820200")  # device_info request (FlipperProto-built)
 
     async def run(label, send_start):
@@ -204,7 +220,10 @@ def do_ctl():
             disc = {"notification_discriminator": lambda d: True}
 
             def on_rx(_c, d):
-                b = bytes(d); log("  [rx61]", len(b), b.hex()[:80]); got.append(b)
+                b = bytes(d)
+                log("  [rx61]", len(b), b.hex()[:80])
+                got.append(b)
+
             await client.start_notify(RX, on_rx, cb=disc)
             await client.start_notify(FLOW, lambda _c, d: log("  [flow63]", bytes(d).hex()[:24]), cb=disc)
             await client.start_notify(STATUS, lambda _c, d: log("  [status64]", bytes(d).hex()[:24]), cb=disc)
@@ -223,17 +242,20 @@ def do_ctl():
         await run("A-with-start", True)
         await asyncio.sleep(0.5)
         await run("B-no-start", False)
+
     asyncio.run(main())
 
 
 def do_scan():
     async def _s():
         from bleak import BleakScanner
+
         ds = await BleakScanner.discover(timeout=8, return_adv=True)
         for addr, (d, adv) in ds.items():
-            n = (d.name or adv.local_name or "")
+            n = d.name or adv.local_name or ""
             if "flip" in n.lower():
                 log("FLIPPER_FOUND", addr, n, adv.rssi)
+
     asyncio.run(_s())
 
 
@@ -266,7 +288,7 @@ def _parse_main(msg):
                 has_next = v
         elif wt == 2:
             ln, i = _uvarint(msg, i)
-            sub = msg[i:i + ln]
+            sub = msg[i : i + ln]
             i += ln
             if field == 33:  # *_device_info_response sub-message (key=1, value=2)
                 j = 0
@@ -277,7 +299,7 @@ def _parse_main(msg):
                     f2, w2 = t2 >> 3, t2 & 7
                     if w2 == 2:
                         l2, j = _uvarint(sub, j)
-                        s = sub[j:j + l2]
+                        s = sub[j : j + l2]
                         j += l2
                         if f2 == 1:
                             key = s.decode("utf-8", "replace")
@@ -298,7 +320,7 @@ def _parse_status(buf):
     ln, off = _uvarint(buf, 0)
     if ln is None or len(buf) < off + ln:
         return None
-    msg = bytes(buf[off:off + ln])
+    msg = bytes(buf[off : off + ln])
     i = 0
     status = 0
     while i < len(msg):
@@ -320,6 +342,7 @@ def _parse_status(buf):
 
 def do_info():
     from bleak import BleakClient
+
     REQ = bytes.fromhex("050801820200")  # device_info request; NO start_rpc_session over BLE
     fields = {}
 
@@ -333,13 +356,14 @@ def do_info():
                 ln, off = _uvarint(buf, 0)
                 if ln is None or len(buf) < off + ln:
                     break
-                msg = bytes(buf[off:off + ln])
-                del buf[:off + ln]
+                msg = bytes(buf[off : off + ln])
+                del buf[: off + ln]
                 hn, k, v = _parse_main(msg)
                 if k is not None:
                     fields[k] = v
                 if hn == 0:
                     done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found (Flipper BT on? not bonded to phone?)")
@@ -355,6 +379,7 @@ def do_info():
             except asyncio.TimeoutError:
                 log("(timeout)")
         return fields
+
     info = asyncio.run(_run())
     log(f"DEVICE_INFO over BLE: {len(info)} fields")
     for k, v in info.items():
@@ -363,6 +388,7 @@ def do_info():
 
 def do_screenshot():
     from bleak import BleakClient
+
     result = {}
 
     async def _run():
@@ -373,8 +399,9 @@ def do_screenshot():
             buf.extend(bytes(d))
             idx = bytes(buf).find(FB_MARK)
             if idx != -1 and len(buf) >= idx + 3 + 1024:
-                result["fb"] = bytes(buf[idx + 3:idx + 3 + 1024])
+                result["fb"] = bytes(buf[idx + 3 : idx + 3 + 1024])
                 done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -389,6 +416,7 @@ def do_screenshot():
                 await asyncio.wait_for(done.wait(), timeout=12)
             except asyncio.TimeoutError:
                 log("(timeout; buffered", len(buf), "bytes)")
+
     asyncio.run(_run())
     fb = result.get("fb")
     if not fb:
@@ -404,6 +432,7 @@ def do_press(tokens):
     ['down','ok','+shot']. Each token is btn[:kind]; kind in short|long|press|release
     (default short). '+shot' = grab a screenshot in the SAME connection after the presses."""
     from bleak import BleakClient
+
     BTN = {"up", "down", "left", "right", "ok", "back"}
     shot = "+shot" in tokens
     toks = [t for t in tokens if t != "+shot"]
@@ -441,8 +470,9 @@ def do_press(tokens):
             if shot:
                 idx = bytes(buf).find(FB_MARK)
                 if idx != -1 and len(buf) >= idx + 3 + 1024:
-                    result["fb"] = bytes(buf[idx + 3:idx + 3 + 1024])
+                    result["fb"] = bytes(buf[idx + 3 : idx + 3 + 1024])
                     fb_done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -463,6 +493,7 @@ def do_press(tokens):
                     await asyncio.wait_for(fb_done.wait(), timeout=12)
                 except asyncio.TimeoutError:
                     log("(screenshot timeout)")
+
     asyncio.run(_run())
     log("PRESS_OK", " ".join(toks))
     if shot:
@@ -479,12 +510,13 @@ def do_app_launch(tokens):
     name (may be multiple words) optionally with a trailing '+shot' to grab its first frame."""
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     shot = "+shot" in tokens
     toks = [t for t in tokens if t != "+shot"]
     if "--args" in toks:
         i = toks.index("--args")
         name = " ".join(toks[:i]).strip()
-        appargs = " ".join(toks[i + 1:]).strip()
+        appargs = " ".join(toks[i + 1 :]).strip()
     else:
         name = " ".join(toks).strip()
         appargs = ""
@@ -510,13 +542,14 @@ def do_app_launch(tokens):
             if mode["fb"]:
                 idx = bytes(buf).find(FB_MARK)
                 if idx != -1 and len(buf) >= idx + 3 + 1024:
-                    result["fb"] = bytes(buf[idx + 3:idx + 3 + 1024])
+                    result["fb"] = bytes(buf[idx + 3 : idx + 3 + 1024])
                     fb_done.set()
             else:
                 st = _parse_status(buf)
                 if st is not None:
                     result["status"] = st
                     status_done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -532,7 +565,7 @@ def do_app_launch(tokens):
             except asyncio.TimeoutError:
                 pass
             if shot:
-                await asyncio.sleep(0.7)   # let the app draw its first frame
+                await asyncio.sleep(0.7)  # let the app draw its first frame
                 mode["fb"] = True
                 buf.clear()
                 await client.write_gatt_char(TX, SCREEN_REQ, response=False)
@@ -540,6 +573,7 @@ def do_app_launch(tokens):
                     await asyncio.wait_for(fb_done.wait(), timeout=12)
                 except asyncio.TimeoutError:
                     log("(screenshot timeout)")
+
     asyncio.run(_run())
     st = result.get("status")
     if st is None:
@@ -547,8 +581,10 @@ def do_app_launch(tokens):
     elif st == 0:
         log(f"APP_LAUNCH_OK {name}")
     else:
-        log(f"APP_LAUNCH_ERR {name}: status={st} (unknown app name, or an app is already "
-            f"running — exit it first)")
+        log(
+            f"APP_LAUNCH_ERR {name}: status={st} (unknown app name, or an app is already "
+            f"running — exit it first)"
+        )
     if shot:
         fb = result.get("fb")
         if fb:
@@ -562,6 +598,7 @@ def do_storage_list(tokens):
     """List a directory over BLE (storage_list_request). tokens join into the path (may have spaces)."""
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     path = " ".join(tokens).strip() or "/ext"
     m = flipper_pb2.Main()
     m.command_id = 1
@@ -580,8 +617,8 @@ def do_storage_list(tokens):
                 ln, off = _uvarint(buf, 0)
                 if ln is None or len(buf) < off + ln:
                     break
-                msg = bytes(buf[off:off + ln])
-                del buf[:off + ln]
+                msg = bytes(buf[off : off + ln])
+                del buf[: off + ln]
                 main = flipper_pb2.Main()
                 main.ParseFromString(msg)
                 if main.command_status != 0:
@@ -590,6 +627,7 @@ def do_storage_list(tokens):
                     files.append((f.type, f.name, f.size))
                 if not main.has_next:
                     done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -604,6 +642,7 @@ def do_storage_list(tokens):
                 await asyncio.wait_for(done.wait(), timeout=20)
             except asyncio.TimeoutError:
                 log("(timeout)")
+
     asyncio.run(_run())
     if err["code"]:
         log(f"LIST_ERR {path}: status={err['code']} (path not found?)")
@@ -619,6 +658,7 @@ def do_storage_read(tokens):
     to ble_file.bin and reports size + text/binary."""
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     path = " ".join(tokens).strip()
     if not path:
         log("no path given")
@@ -640,8 +680,8 @@ def do_storage_read(tokens):
                 ln, off = _uvarint(buf, 0)
                 if ln is None or len(buf) < off + ln:
                     break
-                msg = bytes(buf[off:off + ln])
-                del buf[:off + ln]
+                msg = bytes(buf[off : off + ln])
+                del buf[: off + ln]
                 main = flipper_pb2.Main()
                 main.ParseFromString(msg)
                 if main.command_status != 0:
@@ -649,6 +689,7 @@ def do_storage_read(tokens):
                 data.extend(main.storage_read_response.file.data)
                 if not main.has_next:
                     done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -663,6 +704,7 @@ def do_storage_read(tokens):
                 await asyncio.wait_for(done.wait(), timeout=30)
             except asyncio.TimeoutError:
                 log("(timeout — file may be too large for BLE; use USB)")
+
     asyncio.run(_run())
     if err["code"]:
         log(f"FILE_ERR {path}: status={err['code']} (not found / not a file?)")
@@ -682,6 +724,7 @@ def do_storage_read(tokens):
 def _mk(setter):
     """Build a framed PB_Main (command_id=1) configured by setter(main)."""
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     m = flipper_pb2.Main()
     m.command_id = 1
     setter(m)
@@ -690,9 +733,11 @@ def _mk(setter):
 
 def _status_handler(st):
     """A handle() that records command_status of the first complete response and stops."""
+
     def h(main):
         st["s"] = main.command_status
         return True
+
     return h
 
 
@@ -701,6 +746,7 @@ def _rpc(build_req, handle, timeout=20):
     until it returns True or has_next=0. Returns True if the device was found."""
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     state = {"found": False}
 
     async def _run():
@@ -713,12 +759,13 @@ def _rpc(build_req, handle, timeout=20):
                 ln, off = _uvarint(buf, 0)
                 if ln is None or len(buf) < off + ln:
                     break
-                msg = bytes(buf[off:off + ln])
-                del buf[:off + ln]
+                msg = bytes(buf[off : off + ln])
+                del buf[: off + ln]
                 main = flipper_pb2.Main()
                 main.ParseFromString(msg)
                 if handle(main) or not main.has_next:
                     done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -733,6 +780,7 @@ def _rpc(build_req, handle, timeout=20):
                 await asyncio.wait_for(done.wait(), timeout=timeout)
             except asyncio.TimeoutError:
                 log("(timeout)")
+
     asyncio.run(_run())
     return state["found"]
 
@@ -746,6 +794,7 @@ def do_power_info():
         if r.key:
             fields[r.key] = r.value
         return False
+
     _rpc(lambda: _mk(lambda m: m.system_power_info_request.SetInParent()), h, timeout=12)
     log(f"POWER_INFO: {len(fields)} fields")
     for k, v in fields.items():
@@ -759,6 +808,7 @@ def do_ping():
     def h(main):
         got["data"] = bytes(main.system_ping_response.data)
         return True
+
     if _rpc(lambda: _mk(lambda m: setattr(m.system_ping_request, "data", payload)), h, timeout=8):
         d = got.get("data")
         log("PING_OK (echo matched)" if d == payload else f"PING got {d!r}")
@@ -771,6 +821,7 @@ def do_get_datetime():
         dt = main.system_get_datetime_response.datetime
         got["v"] = (dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
         return True
+
     if _rpc(lambda: _mk(lambda m: m.system_get_datetime_request.SetInParent()), h, timeout=8):
         if "v" in got:
             y, mo, d, hh, mm, ss = got["v"]
@@ -779,7 +830,9 @@ def do_get_datetime():
 
 def do_set_datetime(tokens):
     import datetime as _dt
+
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     if tokens and tokens[0] != "now":
         y, mo, d, hh, mm, ss = (int(x) for x in tokens[:6])
     else:
@@ -794,10 +847,13 @@ def do_set_datetime(tokens):
         dt.hour, dt.minute, dt.second = hh, mm, ss
         dt.weekday = _dt.date(y, mo, d).weekday() + 1
         return _frame(m.SerializeToString())
+
     st = {}
     _rpc(build, _status_handler(st), timeout=8)
-    log(f"SETDATETIME {'OK' if st.get('s', 0) == 0 else 'ERR ' + str(st.get('s'))} "
-        f"{y:04d}-{mo:02d}-{d:02d} {hh:02d}:{mm:02d}:{ss:02d}")
+    log(
+        f"SETDATETIME {'OK' if st.get('s', 0) == 0 else 'ERR ' + str(st.get('s'))} "
+        f"{y:04d}-{mo:02d}-{d:02d} {hh:02d}:{mm:02d}:{ss:02d}"
+    )
 
 
 def do_desktop_locked():
@@ -809,7 +865,11 @@ def do_desktop_locked():
 
 def do_alert():
     st = {}
-    _rpc(lambda: _mk(lambda m: m.system_play_audiovisual_alert_request.SetInParent()), _status_handler(st), timeout=8)
+    _rpc(
+        lambda: _mk(lambda m: m.system_play_audiovisual_alert_request.SetInParent()),
+        _status_handler(st),
+        timeout=8,
+    )
     log(f"ALERT {'OK (beep+flash)' if st.get('s', 0) == 0 else 'ERR ' + str(st.get('s'))}")
 
 
@@ -826,6 +886,7 @@ def do_app_lock_status():
     def h(main):
         got["locked"] = main.app_lock_status_response.locked
         return True
+
     if _rpc(lambda: _mk(lambda m: m.app_lock_status_request.SetInParent()), h, timeout=8):
         log(f"APP_LOCK {'an app is RUNNING' if got.get('locked') else 'free (desktop/menu)'}")
 
@@ -836,7 +897,9 @@ def do_app_load(tokens):
         log("no path given")
         return
     st = {}
-    _rpc(lambda: _mk(lambda m: setattr(m.app_load_file_request, "path", path)), _status_handler(st), timeout=10)
+    _rpc(
+        lambda: _mk(lambda m: setattr(m.app_load_file_request, "path", path)), _status_handler(st), timeout=10
+    )
     s = st.get("s", 0)
     log(f"APP_LOAD {path}: {'OK' if s == 0 else 'ERR ' + str(s) + ' (start the matching app first?)'}")
 
@@ -844,6 +907,7 @@ def do_app_load(tokens):
 def do_app_button(tokens):
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     args = " ".join(tokens).strip()
     press = _mk(lambda m: setattr(m.app_button_press_request, "args", args))
     release = _mk(lambda m: m.app_button_release_request.SetInParent())
@@ -859,14 +923,15 @@ def do_app_button(tokens):
                 ln, off = _uvarint(buf, 0)
                 if ln is None or len(buf) < off + ln:
                     break
-                msg = bytes(buf[off:off + ln])
-                del buf[:off + ln]
+                msg = bytes(buf[off : off + ln])
+                del buf[: off + ln]
                 main = flipper_pb2.Main()
                 main.ParseFromString(msg)
                 if not main.has_next:
                     st["codes"].append(main.command_status)
                     if len(st["codes"]) >= 2:
                         done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -882,6 +947,7 @@ def do_app_button(tokens):
                 await asyncio.wait_for(done.wait(), timeout=8)
             except asyncio.TimeoutError:
                 pass
+
     asyncio.run(_run())
     log(f"APP_BUTTON {args!r}: statuses={st['codes']}")
 
@@ -896,6 +962,7 @@ def do_storage_info(tokens):
         got["total"] = main.storage_info_response.total_space
         got["free"] = main.storage_info_response.free_space
         return True
+
     _rpc(lambda: _mk(lambda m: setattr(m.storage_info_request, "path", path)), h, timeout=10)
     if got.get("s", 0):
         log(f"INFO_ERR {path}: status={got['s']}")
@@ -917,6 +984,7 @@ def do_storage_stat(tokens):
         got["type"] = main.storage_stat_response.file.type
         got["size"] = main.storage_stat_response.file.size
         return True
+
     _rpc(lambda: _mk(lambda m: setattr(m.storage_stat_request, "path", path)), h, timeout=10)
     if got.get("s", 0):
         log(f"STAT_ERR {path}: status={got['s']} (not found?)")
@@ -935,6 +1003,7 @@ def do_storage_md5(tokens):
         got["s"] = main.command_status
         got["md5"] = main.storage_md5sum_response.md5sum
         return True
+
     _rpc(lambda: _mk(lambda m: setattr(m.storage_md5sum_request, "path", path)), h, timeout=15)
     if got.get("s", 0):
         log(f"MD5_ERR {path}: status={got['s']}")
@@ -953,6 +1022,7 @@ def do_storage_delete(tokens):
     def setter(m):
         m.storage_delete_request.path = path
         m.storage_delete_request.recursive = recursive
+
     st = {}
     _rpc(lambda: _mk(setter), _status_handler(st), timeout=12)
     s = st.get("s", 0)
@@ -965,7 +1035,9 @@ def do_storage_mkdir(tokens):
         log("no path given")
         return
     st = {}
-    _rpc(lambda: _mk(lambda m: setattr(m.storage_mkdir_request, "path", path)), _status_handler(st), timeout=10)
+    _rpc(
+        lambda: _mk(lambda m: setattr(m.storage_mkdir_request, "path", path)), _status_handler(st), timeout=10
+    )
     s = st.get("s", 0)
     log(f"MKDIR {path}: {'OK' if s == 0 else 'ERR ' + str(s)}")
 
@@ -976,7 +1048,7 @@ def do_storage_rename(tokens):
         return
     i = tokens.index("->")
     old = " ".join(tokens[:i]).strip()
-    new = " ".join(tokens[i + 1:]).strip()
+    new = " ".join(tokens[i + 1 :]).strip()
     if not old or not new:
         log("need: <old> -> <new>")
         return
@@ -984,6 +1056,7 @@ def do_storage_rename(tokens):
     def setter(m):
         m.storage_rename_request.old_path = old
         m.storage_rename_request.new_path = new
+
     st = {}
     _rpc(lambda: _mk(setter), _status_handler(st), timeout=12)
     s = st.get("s", 0)
@@ -994,6 +1067,7 @@ def do_storage_write(tokens):
     """Upload ble_upload.bin to <dest> over BLE (chunked storage_write_request stream)."""
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     path = " ".join(tokens).strip()
     if not path:
         log("no dest path given")
@@ -1005,7 +1079,7 @@ def do_storage_write(tokens):
         log("no upload payload (ble_upload.bin missing)")
         return
     CHUNK = 512
-    chunks = [data[i:i + CHUNK] for i in range(0, len(data), CHUNK)] or [b""]
+    chunks = [data[i : i + CHUNK] for i in range(0, len(data), CHUNK)] or [b""]
     st = {}
 
     async def _run():
@@ -1018,13 +1092,14 @@ def do_storage_write(tokens):
                 ln, off = _uvarint(buf, 0)
                 if ln is None or len(buf) < off + ln:
                     break
-                msg = bytes(buf[off:off + ln])
-                del buf[:off + ln]
+                msg = bytes(buf[off : off + ln])
+                del buf[: off + ln]
                 main = flipper_pb2.Main()
                 main.ParseFromString(msg)
                 if not main.has_next:
                     st["s"] = main.command_status
                     done.set()
+
         dev = await _find_device()
         if dev is None:
             log("device not found in scan")
@@ -1035,7 +1110,7 @@ def do_storage_write(tokens):
             await asyncio.sleep(0.2)
             gchunk = max(20, (getattr(client, "mtu_size", 0) or 23) - 3)
             for i, ch in enumerate(chunks):
-                last = (i == len(chunks) - 1)
+                last = i == len(chunks) - 1
                 m = flipper_pb2.Main()
                 m.command_id = 1
                 m.has_next = not last
@@ -1044,12 +1119,13 @@ def do_storage_write(tokens):
                 m.storage_write_request.file.data = ch
                 frame = _frame(m.SerializeToString())
                 for j in range(0, len(frame), gchunk):
-                    await client.write_gatt_char(TX, frame[j:j + gchunk], response=False)
+                    await client.write_gatt_char(TX, frame[j : j + gchunk], response=False)
                 await asyncio.sleep(0.02)
             try:
                 await asyncio.wait_for(done.wait(), timeout=45)
             except asyncio.TimeoutError:
                 log("(timeout — large file? use USB)")
+
     asyncio.run(_run())
     s = st.get("s", 0)
     log(f"WRITE {path} ({len(data)} bytes): {'OK' if s == 0 else 'ERR ' + str(s)}")
@@ -1077,6 +1153,7 @@ def _status_str(code):
     if code == 0:
         return "OK"
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2
+
     name = {v: k for k, v in flipper_pb2.CommandStatus.items()}.get(code, "ERROR")
     hint = _STATUS_HINT.get(code)
     return f"ERR {code} {name}" + (f" - {hint}" if hint else "")
@@ -1091,6 +1168,7 @@ def do_app_error():
         got["code"] = main.app_get_error_response.code
         got["text"] = main.app_get_error_response.text
         return True
+
     if _rpc(lambda: _mk(lambda m: m.app_get_error_request.SetInParent()), h, timeout=8):
         log(f"APP_ERROR code={got.get('code', 0)} text={got.get('text', '')!r}")
 
@@ -1106,7 +1184,8 @@ def do_reboot(tokens):
     """Reboot the Flipper. mode in OS|DFU|UPDATE (default OS). No response (device resets)."""
     from bleak import BleakClient
     from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2, system_pb2
-    mode = (tokens[0].upper() if tokens else "OS")
+
+    mode = tokens[0].upper() if tokens else "OS"
     if mode not in ("OS", "DFU", "UPDATE"):
         log(f"bad mode {mode!r}; use OS|DFU|UPDATE")
         return
@@ -1127,6 +1206,7 @@ def do_reboot(tokens):
             log("connected")
             await client.write_gatt_char(TX, build(), response=False)
             await asyncio.sleep(0.5)
+
     asyncio.run(_run())
     log(f"REBOOT sent (mode={mode}) - device is restarting")
 
@@ -1134,7 +1214,8 @@ def do_reboot(tokens):
 # ---- GPIO (over RPC) --------------------------------------------------------
 def do_gpio_read(tokens):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
-    pin = (tokens[0].upper() if tokens else "")
+
+    pin = tokens[0].upper() if tokens else ""
     if pin not in gpio_pb2.GpioPin.keys():
         log(f"bad pin {pin!r}; use {list(gpio_pb2.GpioPin.keys())}")
         return
@@ -1145,6 +1226,7 @@ def do_gpio_read(tokens):
         got["s"] = main.command_status
         got["v"] = main.gpio_read_pin_response.value
         return True
+
     if _rpc(lambda: _mk(lambda m: setattr(m.gpio_read_pin, "pin", pv)), h, timeout=8):
         if got.get("s", 0):
             log(f"GPIO_READ {pin}: {_status_str(got['s'])}")
@@ -1154,6 +1236,7 @@ def do_gpio_read(tokens):
 
 def do_gpio_write(tokens):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+
     if len(tokens) < 2:
         log("usage: gpiowrite <PIN> <0|1>")
         return
@@ -1166,6 +1249,7 @@ def do_gpio_write(tokens):
     def setter(m):
         m.gpio_write_pin.pin = gpio_pb2.GpioPin.Value(pin)
         m.gpio_write_pin.value = val
+
     st = {}
     _rpc(lambda: _mk(setter), _status_handler(st), timeout=8)
     log(f"GPIO_WRITE {pin}={val}: {_status_str(st.get('s', 0))}")
@@ -1173,6 +1257,7 @@ def do_gpio_write(tokens):
 
 def do_gpio_mode(tokens):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+
     if len(tokens) < 2:
         log("usage: gpiomode <PIN> <output|input>")
         return
@@ -1184,25 +1269,43 @@ def do_gpio_mode(tokens):
     def setter(m):
         m.gpio_set_pin_mode.pin = gpio_pb2.GpioPin.Value(pin)
         m.gpio_set_pin_mode.mode = gpio_pb2.GpioPinMode.Value(mode)
+
     st = {}
     _rpc(lambda: _mk(setter), _status_handler(st), timeout=8)
     log(f"GPIO_MODE {pin}={mode}: {_status_str(st.get('s', 0))}")
 
 
 DISPATCH = {
-    "ctl": do_ctl, "scan": do_scan, "info": do_info, "screenshot": do_screenshot,
-    "press": lambda: do_press(sys.argv[2:]), "app": lambda: do_app_launch(sys.argv[2:]),
-    "list": lambda: do_storage_list(sys.argv[2:]), "read": lambda: do_storage_read(sys.argv[2:]),
-    "diskinfo": lambda: do_storage_info(sys.argv[2:]), "stat": lambda: do_storage_stat(sys.argv[2:]),
-    "md5": lambda: do_storage_md5(sys.argv[2:]), "write": lambda: do_storage_write(sys.argv[2:]),
-    "delete": lambda: do_storage_delete(sys.argv[2:]), "mkdir": lambda: do_storage_mkdir(sys.argv[2:]),
-    "rename": lambda: do_storage_rename(sys.argv[2:]), "appexit": do_app_exit,
-    "appload": lambda: do_app_load(sys.argv[2:]), "applock": do_app_lock_status,
-    "appbutton": lambda: do_app_button(sys.argv[2:]), "power": do_power_info, "ping": do_ping,
-    "getdt": do_get_datetime, "setdt": lambda: do_set_datetime(sys.argv[2:]),
-    "locked": do_desktop_locked, "alert": do_alert, "apperror": do_app_error,
-    "unlock": do_desktop_unlock, "reboot": lambda: do_reboot(sys.argv[2:]),
-    "gpioread": lambda: do_gpio_read(sys.argv[2:]), "gpiowrite": lambda: do_gpio_write(sys.argv[2:]),
+    "ctl": do_ctl,
+    "scan": do_scan,
+    "info": do_info,
+    "screenshot": do_screenshot,
+    "press": lambda: do_press(sys.argv[2:]),
+    "app": lambda: do_app_launch(sys.argv[2:]),
+    "list": lambda: do_storage_list(sys.argv[2:]),
+    "read": lambda: do_storage_read(sys.argv[2:]),
+    "diskinfo": lambda: do_storage_info(sys.argv[2:]),
+    "stat": lambda: do_storage_stat(sys.argv[2:]),
+    "md5": lambda: do_storage_md5(sys.argv[2:]),
+    "write": lambda: do_storage_write(sys.argv[2:]),
+    "delete": lambda: do_storage_delete(sys.argv[2:]),
+    "mkdir": lambda: do_storage_mkdir(sys.argv[2:]),
+    "rename": lambda: do_storage_rename(sys.argv[2:]),
+    "appexit": do_app_exit,
+    "appload": lambda: do_app_load(sys.argv[2:]),
+    "applock": do_app_lock_status,
+    "appbutton": lambda: do_app_button(sys.argv[2:]),
+    "power": do_power_info,
+    "ping": do_ping,
+    "getdt": do_get_datetime,
+    "setdt": lambda: do_set_datetime(sys.argv[2:]),
+    "locked": do_desktop_locked,
+    "alert": do_alert,
+    "apperror": do_app_error,
+    "unlock": do_desktop_unlock,
+    "reboot": lambda: do_reboot(sys.argv[2:]),
+    "gpioread": lambda: do_gpio_read(sys.argv[2:]),
+    "gpiowrite": lambda: do_gpio_write(sys.argv[2:]),
     "gpiomode": lambda: do_gpio_mode(sys.argv[2:]),
     "daemon": lambda: __import__("flipper_bled").run(),
 }
@@ -1219,10 +1322,12 @@ def _cli():
             log("unknown cmd", cmd)
     except Exception as e:
         import traceback
+
         log("WORKER ERROR:", type(e).__name__, repr(e))
         log(traceback.format_exc())
     log("WORKER DONE")
     import os
+
     sys.stdout.flush()
     os._exit(0)
 

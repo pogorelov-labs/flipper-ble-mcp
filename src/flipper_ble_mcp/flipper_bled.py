@@ -15,6 +15,7 @@ Protocol: newline-delimited JSON over AF_UNIX at ~/flipper-ai/bled.sock.
 Connection: lazy-connect on first BLE command; idle-disconnect after IDLE_SEC to free
 the radio for the phone; auto-reconnect on the next command.
 """
+
 import asyncio
 import base64
 import json
@@ -27,7 +28,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ble_worker as w  # noqa: E402  (now importable: dispatch is under __main__)
 from flipperzero_protobuf.flipperzero_protobuf_compiled import flipper_pb2  # noqa: E402
 
-_HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp"); os.makedirs(_HOME, exist_ok=True); SOCK = os.path.join(_HOME, "bled.sock")
+_HOME = os.environ.get("FLIPPER_AI_HOME") or os.path.expanduser("~/.flipper-ble-mcp")
+os.makedirs(_HOME, exist_ok=True)
+SOCK = os.path.join(_HOME, "bled.sock")
 TOKEN_FILE = os.path.join(_HOME, "bled.token")
 _TOKEN = None
 PNG = os.path.join(_HOME, "ble_screen.png")
@@ -40,9 +43,9 @@ _buf = bytearray()
 _lock = threading.Lock()
 _conn_lock = asyncio.Lock()
 _last_activity = [0.0]
-_dev = [None]              # cached BLEDevice — reconnect without a fresh scan
-_lockf = None              # singleton flock handle (held for daemon lifetime)
-_last_shot = {"png": b"", "ts": 0.0}   # serve a screenshot <0.4s old without re-grabbing
+_dev = [None]  # cached BLEDevice — reconnect without a fresh scan
+_lockf = None  # singleton flock handle (held for daemon lifetime)
+_last_shot = {"png": b"", "ts": 0.0}  # serve a screenshot <0.4s old without re-grabbing
 
 
 def log(*a):
@@ -57,6 +60,7 @@ async def _ensure():
     if _client is not None and _client.is_connected:
         return True
     from bleak import BleakClient
+
     async with _conn_lock:
         if _client is not None and _client.is_connected:
             return True
@@ -70,10 +74,11 @@ async def _ensure():
             def on_rx(_h, d):
                 with _lock:
                     _buf.extend(bytes(d))
+
             await c.start_notify(w.RX, on_rx, cb={"notification_discriminator": lambda d: True})
             return c
 
-        if _dev[0] is not None:                       # fast path: reconnect to cached device, no scan
+        if _dev[0] is not None:  # fast path: reconnect to cached device, no scan
             try:
                 _client = await _try(_dev[0])
                 log("reconnected (cached dev)")
@@ -81,7 +86,7 @@ async def _ensure():
             except Exception as e:
                 log("cached reconnect failed, rescanning:", repr(e))
                 _dev[0] = None
-        dev = await w._find_device()                  # slow path: scan + connect
+        dev = await w._find_device()  # slow path: scan + connect
         if dev is None:
             return False
         try:
@@ -110,19 +115,19 @@ async def _idle_watch():
     while True:
         await asyncio.sleep(15)
         if _client is not None and _last_activity[0] and (time.monotonic() - _last_activity[0]) > IDLE_SEC:
-            async with _cmd_lock:                     # never disconnect mid-command
+            async with _cmd_lock:  # never disconnect mid-command
                 if _client is not None and (time.monotonic() - _last_activity[0]) > IDLE_SEC:
                     await _disconnect()
 
 
 # ---- held-connection transaction core --------------------------------------
-_cmd_lock = asyncio.Lock()   # serialize commands so they never interleave on the shared buffer
-_CUR_CID = [0]               # command_id of the in-flight command (for response demux)
+_cmd_lock = asyncio.Lock()  # serialize commands so they never interleave on the shared buffer
+_CUR_CID = [0]  # command_id of the in-flight command (for response demux)
 _CID_SEQ = [1]
 
 
 def _next_cid():
-    _CID_SEQ[0] = (_CID_SEQ[0] % 120) + 2   # cycle 2..121, never 0/1
+    _CID_SEQ[0] = (_CID_SEQ[0] % 120) + 2  # cycle 2..121, never 0/1
     _CUR_CID[0] = _CID_SEQ[0]
     return _CID_SEQ[0]
 
@@ -130,9 +135,9 @@ def _next_cid():
 def _patch_cid(req, cid):
     """Rewrite a framed PB_Main's command_id (built as 1) to cid in place. cid in 2..121 → 1 byte,
     so length is preserved."""
-    _ln, off = w._uvarint(req, 0)            # off = start of body
+    _ln, off = w._uvarint(req, 0)  # off = start of body
     b = bytearray(req)
-    if off < len(b) and b[off] == 0x08:      # command_id field tag, 1-byte value
+    if off < len(b) and b[off] == 0x08:  # command_id field tag, 1-byte value
         b[off + 1] = cid
     return bytes(b)
 
@@ -168,7 +173,7 @@ def _mains(snap):
             break
         m = flipper_pb2.Main()
         try:
-            m.ParseFromString(bytes(snap[off:off + ln]))
+            m.ParseFromString(bytes(snap[off : off + ln]))
         except Exception:
             break
         i = off + ln
@@ -201,8 +206,12 @@ async def h_info(args):
         if _stream_done(ms) or final:
             return fields
         return None
+
     await _txn(w._mk(lambda m: m.system_device_info_request.SetInParent()), parse, 12)
-    return {"ok": True, "text": f"DEVICE_INFO: {len(fields)} fields\n" + "\n".join(f"  {k} = {v}" for k, v in fields.items())}
+    return {
+        "ok": True,
+        "text": f"DEVICE_INFO: {len(fields)} fields\n" + "\n".join(f"  {k} = {v}" for k, v in fields.items()),
+    }
 
 
 async def h_power(args):
@@ -217,6 +226,7 @@ async def h_power(args):
         if _stream_done(ms) or final:
             return fields
         return None
+
     await _txn(w._mk(lambda m: m.system_power_info_request.SetInParent()), parse, 10)
     return {"ok": True, "text": "\n".join(f"{k} = {v}" for k, v in fields.items())}
 
@@ -232,8 +242,12 @@ def _first(snap, extract):
 
 async def h_ping(args):
     payload = b"flipperping"
-    r = await _txn(w._mk(lambda m: setattr(m.system_ping_request, "data", payload)),
-                   lambda s, final=False: _first(s, lambda m: bytes(m.system_ping_response.data) if m.HasField("system_ping_response") else None))
+    r = await _txn(
+        w._mk(lambda m: setattr(m.system_ping_request, "data", payload)),
+        lambda s, final=False: _first(
+            s, lambda m: bytes(m.system_ping_response.data) if m.HasField("system_ping_response") else None
+        ),
+    )
     return {"ok": True, "text": "PING_OK" if r == payload else f"PING {r!r}"}
 
 
@@ -243,10 +257,15 @@ async def h_getdt(args):
             return None
         d = m.system_get_datetime_response.datetime
         return (d.year, d.month, d.day, d.hour, d.minute, d.second)
-    r = await _txn(w._mk(lambda m: m.system_get_datetime_request.SetInParent()),
-                   lambda s, final=False: _first(s, ext))
+
+    r = await _txn(
+        w._mk(lambda m: m.system_get_datetime_request.SetInParent()), lambda s, final=False: _first(s, ext)
+    )
     if r:
-        return {"ok": True, "text": f"DATETIME {r[0]:04d}-{r[1]:02d}-{r[2]:02d} {r[3]:02d}:{r[4]:02d}:{r[5]:02d}"}
+        return {
+            "ok": True,
+            "text": f"DATETIME {r[0]:04d}-{r[1]:02d}-{r[2]:02d} {r[3]:02d}:{r[4]:02d}:{r[5]:02d}",
+        }
     return {"ok": False, "text": "(no datetime)"}
 
 
@@ -254,6 +273,7 @@ async def _status_cmd(req, label, timeout=8):
     def parse(snap, final=False):
         ms = _mains(snap)
         return ms[0].command_status if ms else (-1 if final else None)
+
     s = await _txn(req, parse, timeout)
     s = 0 if s is None else s
     return {"ok": s == 0, "text": f"{label} {w._status_str(s)}", "status": s}
@@ -261,6 +281,7 @@ async def _status_cmd(req, label, timeout=8):
 
 async def h_setdt(args):
     import datetime as _dt
+
     n = _dt.datetime.now() if (not args or args[0] == "now") else None
     if n:
         y, mo, d, hh, mm, ss = n.year, n.month, n.day, n.hour, n.minute, n.second
@@ -275,6 +296,7 @@ async def h_setdt(args):
         dt.hour, dt.minute, dt.second = hh, mm, ss
         dt.weekday = _dt.date(y, mo, d).weekday() + 1
         return w._frame(m.SerializeToString())
+
     return await _status_cmd(build(), f"SETDATETIME {y:04d}-{mo:02d}-{d:02d}")
 
 
@@ -285,8 +307,15 @@ async def h_locked(args):
 
 async def h_applock(args):
     def ext(m):
-        return ("locked" if m.app_lock_status_response.locked else "free") if m.HasField("app_lock_status_response") else None
-    r = await _txn(w._mk(lambda m: m.app_lock_status_request.SetInParent()), lambda s, final=False: _first(s, ext))
+        return (
+            ("locked" if m.app_lock_status_response.locked else "free")
+            if m.HasField("app_lock_status_response")
+            else None
+        )
+
+    r = await _txn(
+        w._mk(lambda m: m.app_lock_status_request.SetInParent()), lambda s, final=False: _first(s, ext)
+    )
     return {"ok": True, "text": f"APP_LOCK {'an app is RUNNING' if r == 'locked' else 'free (desktop/menu)'}"}
 
 
@@ -295,7 +324,10 @@ async def h_apperror(args):
         if not m.HasField("app_get_error_response"):
             return None
         return (m.app_get_error_response.code, m.app_get_error_response.text)
-    r = await _txn(w._mk(lambda m: m.app_get_error_request.SetInParent()), lambda s, final=False: _first(s, ext))
+
+    r = await _txn(
+        w._mk(lambda m: m.app_get_error_request.SetInParent()), lambda s, final=False: _first(s, ext)
+    )
     code, text = r if r else (0, "")
     return {"ok": True, "text": f"APP_ERROR code={code} text={text!r}"}
 
@@ -316,12 +348,16 @@ async def h_appload(args):
     path = " ".join(args).strip()
     if not path:
         return {"ok": False, "text": "no path"}
-    return await _status_cmd(w._mk(lambda m: setattr(m.app_load_file_request, "path", path)), f"APP_LOAD {path}", 10)
+    return await _status_cmd(
+        w._mk(lambda m: setattr(m.app_load_file_request, "path", path)), f"APP_LOAD {path}", 10
+    )
 
 
 async def h_mkdir(args):
     path = " ".join(args).strip()
-    return await _status_cmd(w._mk(lambda m: setattr(m.storage_mkdir_request, "path", path)), f"MKDIR {path}", 10)
+    return await _status_cmd(
+        w._mk(lambda m: setattr(m.storage_mkdir_request, "path", path)), f"MKDIR {path}", 10
+    )
 
 
 async def h_delete(args):
@@ -331,6 +367,7 @@ async def h_delete(args):
     def setter(m):
         m.storage_delete_request.path = path
         m.storage_delete_request.recursive = rec
+
     return await _status_cmd(w._mk(setter), f"DELETE {path} (recursive={rec})", 12)
 
 
@@ -338,17 +375,19 @@ async def h_rename(args):
     if "->" not in args:
         return {"ok": False, "text": "need: <old> -> <new>"}
     i = args.index("->")
-    old, new = " ".join(args[:i]).strip(), " ".join(args[i + 1:]).strip()
+    old, new = " ".join(args[:i]).strip(), " ".join(args[i + 1 :]).strip()
 
     def setter(m):
         m.storage_rename_request.old_path = old
         m.storage_rename_request.new_path = new
+
     return await _status_cmd(w._mk(setter), f"RENAME {old} -> {new}", 12)
 
 
 async def h_gpioread(args):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
-    pin = (args[0].upper() if args else "")
+
+    pin = args[0].upper() if args else ""
     if pin not in gpio_pb2.GpioPin.keys():
         return {"ok": False, "text": f"bad pin {pin!r}"}
     pv = gpio_pb2.GpioPin.Value(pin)
@@ -359,15 +398,20 @@ async def h_gpioread(args):
             return None
         m = ms[0]
         return (m.command_status, m.gpio_read_pin_response.value)
+
     r = await _txn(w._mk(lambda m: setattr(m.gpio_read_pin, "pin", pv)), parse, 8)
     if r is None:
         return {"ok": False, "text": "GPIO_READ timeout"}
     st, val = r
-    return {"ok": st == 0, "text": f"GPIO_READ {pin} = {val}" if st == 0 else f"GPIO_READ {pin}: {w._status_str(st)}"}
+    return {
+        "ok": st == 0,
+        "text": f"GPIO_READ {pin} = {val}" if st == 0 else f"GPIO_READ {pin}: {w._status_str(st)}",
+    }
 
 
 async def h_gpiowrite(args):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+
     if len(args) < 2:
         return {"ok": False, "text": "usage: gpiowrite <PIN> <0|1>"}
     pin = args[0].upper()
@@ -378,11 +422,13 @@ async def h_gpiowrite(args):
     def setter(m):
         m.gpio_write_pin.pin = gpio_pb2.GpioPin.Value(pin)
         m.gpio_write_pin.value = val
+
     return await _status_cmd(w._mk(setter), f"GPIO_WRITE {pin}={val}")
 
 
 async def h_gpiomode(args):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import gpio_pb2
+
     if len(args) < 2:
         return {"ok": False, "text": "usage: gpiomode <PIN> <output|input>"}
     pin, mode = args[0].upper(), args[1].upper()
@@ -392,6 +438,7 @@ async def h_gpiomode(args):
     def setter(m):
         m.gpio_set_pin_mode.pin = gpio_pb2.GpioPin.Value(pin)
         m.gpio_set_pin_mode.mode = gpio_pb2.GpioPinMode.Value(mode)
+
     return await _status_cmd(w._mk(setter), f"GPIO_MODE {pin}={mode}")
 
 
@@ -404,6 +451,7 @@ async def h_stat(args):
             return None
         m = ms[0]
         return (m.command_status, m.storage_stat_response.file.type, m.storage_stat_response.file.size)
+
     r = await _txn(w._mk(lambda m: setattr(m.storage_stat_request, "path", path)), parse, 10)
     if not r:
         return {"ok": False, "text": "STAT timeout"}
@@ -422,6 +470,7 @@ async def h_diskinfo(args):
             return None
         m = ms[0]
         return (m.command_status, m.storage_info_response.total_space, m.storage_info_response.free_space)
+
     r = await _txn(w._mk(lambda m: setattr(m.storage_info_request, "path", path)), parse, 10)
     if not r:
         return {"ok": False, "text": "INFO timeout"}
@@ -440,6 +489,7 @@ async def h_md5(args):
         if not ms:
             return None
         return (ms[0].command_status, ms[0].storage_md5sum_response.md5sum)
+
     r = await _txn(w._mk(lambda m: setattr(m.storage_md5sum_request, "path", path)), parse, 15)
     if not r:
         return {"ok": False, "text": "MD5 timeout"}
@@ -462,6 +512,7 @@ async def h_list(args):
         if _stream_done(ms) or final:
             return True
         return None
+
     await _txn(w._mk(lambda m: setattr(m.storage_list_request, "path", path)), parse, 20)
     if err[0]:
         return {"ok": False, "text": f"LIST {path}: {w._status_str(err[0])}"}
@@ -485,6 +536,7 @@ async def h_read(args):
         if _stream_done(ms) or final:
             return True
         return None
+
     await _txn(w._mk(lambda m: setattr(m.storage_read_request, "path", path)), parse, 30)
     if err[0]:
         return {"ok": False, "text": f"FILE_ERR {path}: {w._status_str(err[0])}"}
@@ -494,16 +546,22 @@ async def h_read(args):
     try:
         s = raw.decode("utf-8")
         if len(s) > 8000:
-            return {"ok": True, "text": f"[{path} — {len(raw)} bytes; first 8000]\n\n{s[:8000]}\n…[truncated]"}
+            return {
+                "ok": True,
+                "text": f"[{path} — {len(raw)} bytes; first 8000]\n\n{s[:8000]}\n…[truncated]",
+            }
         return {"ok": True, "text": f"[{path} — {len(raw)} bytes]\n\n{s}"}
     except UnicodeDecodeError:
-        return {"ok": True, "text": f"[{path} — {len(raw)} bytes, BINARY] saved to {FILEBIN}\nhex: {raw[:96].hex()}"}
+        return {
+            "ok": True,
+            "text": f"[{path} — {len(raw)} bytes, BINARY] saved to {FILEBIN}\nhex: {raw[:96].hex()}",
+        }
 
 
 def _fb_png(snap):
     idx = snap.find(w.FB_MARK)
     if idx != -1 and len(snap) >= idx + 3 + 1024:
-        fb = snap[idx + 3:idx + 3 + 1024]
+        fb = snap[idx + 3 : idx + 3 + 1024]
         w._fb_to_png(fb, PNG)
         return True
     return None
@@ -528,7 +586,9 @@ async def _quiesce(quiet=0.4, cap=4.0):
 async def _grab_screen(timeout=12):
     r = await _txn(w.SCREEN_REQ, lambda s, final=False: _fb_png(s), timeout)
     try:  # stop the continuous stream, then wait for it to actually stop
-        await _client.write_gatt_char(w.TX, w._mk(lambda m: m.gui_stop_screen_stream_request.SetInParent()), response=False)
+        await _client.write_gatt_char(
+            w.TX, w._mk(lambda m: m.gui_stop_screen_stream_request.SetInParent()), response=False
+        )
     except Exception:
         pass
     await _quiesce()
@@ -544,7 +604,11 @@ async def _grab_screen(timeout=12):
 
 async def h_screenshot(args):
     if _last_shot["png"] and (time.monotonic() - _last_shot["ts"]) < 0.4:
-        return {"ok": True, "png_b64": base64.b64encode(_last_shot["png"]).decode(), "text": "screenshot (cached <0.4s)"}
+        return {
+            "ok": True,
+            "png_b64": base64.b64encode(_last_shot["png"]).decode(),
+            "text": "screenshot (cached <0.4s)",
+        }
     if await _grab_screen():
         return {"ok": True, "png_b64": base64.b64encode(_last_shot["png"]).decode(), "text": "screenshot ok"}
     return {"ok": False, "text": "no framebuffer captured"}
@@ -578,7 +642,11 @@ async def h_press(args):
     await asyncio.sleep(0.2)
     if shot and await _grab_screen():
         with open(PNG, "rb") as fh:
-            return {"ok": True, "png_b64": base64.b64encode(fh.read()).decode(), "text": f"PRESS_OK {' '.join(toks)}"}
+            return {
+                "ok": True,
+                "png_b64": base64.b64encode(fh.read()).decode(),
+                "text": f"PRESS_OK {' '.join(toks)}",
+            }
     return {"ok": True, "text": f"PRESS_OK {' '.join(toks)}"}
 
 
@@ -587,7 +655,7 @@ async def h_app(args):
     toks = [t for t in args if t != "+shot"]
     if "--args" in toks:
         i = toks.index("--args")
-        name, appargs = " ".join(toks[:i]).strip(), " ".join(toks[i + 1:]).strip()
+        name, appargs = " ".join(toks[:i]).strip(), " ".join(toks[i + 1 :]).strip()
     else:
         name, appargs = " ".join(toks).strip(), ""
     if not name:
@@ -604,13 +672,18 @@ async def h_app(args):
     def parse(snap, final=False):
         ms = _mains(snap)
         return ms[0].command_status if ms else (-1 if final else None)
+
     s = await _txn(build(), parse, 10)
     s = 0 if s is None else s
     if shot:
         await asyncio.sleep(0.6)
         if await _grab_screen():
             with open(PNG, "rb") as fh:
-                return {"ok": s == 0, "png_b64": base64.b64encode(fh.read()).decode(), "text": f"APP_LAUNCH {name} {w._status_str(s)}"}
+                return {
+                    "ok": s == 0,
+                    "png_b64": base64.b64encode(fh.read()).decode(),
+                    "text": f"APP_LAUNCH {name} {w._status_str(s)}",
+                }
     return {"ok": s == 0, "text": f"APP_LAUNCH {name} {w._status_str(s)}"}
 
 
@@ -638,10 +711,10 @@ async def h_write(args):
             data = fh.read()
     except FileNotFoundError:
         return {"ok": False, "text": "no upload payload"}
-    CHUNK = 2048   # fit small files (scripts/configs/captures) in ONE storage_write_request — the
-                   # multi-message continuation path is rejected by this firmware (empty-path chunk
-                   # → ERROR_STORAGE_INVALID_NAME); large files should go over USB anyway.
-    chunks = [data[i:i + CHUNK] for i in range(0, len(data), CHUNK)] or [b""]
+    CHUNK = 2048  # fit small files (scripts/configs/captures) in ONE storage_write_request — the
+    # multi-message continuation path is rejected by this firmware (empty-path chunk
+    # → ERROR_STORAGE_INVALID_NAME); large files should go over USB anyway.
+    chunks = [data[i : i + CHUNK] for i in range(0, len(data), CHUNK)] or [b""]
     gchunk = max(20, (getattr(_client, "mtu_size", 0) or 23) - 3)
     st = [None]
     cid = _next_cid()
@@ -649,7 +722,7 @@ async def h_write(args):
     with _lock:
         _buf.clear()
     for i, ch in enumerate(chunks):
-        last = (i == len(chunks) - 1)
+        last = i == len(chunks) - 1
         m = flipper_pb2.Main()
         m.command_id = cid
         m.has_next = not last
@@ -658,7 +731,9 @@ async def h_write(args):
         m.storage_write_request.file.data = ch
         fr = w._frame(m.SerializeToString())
         for j in range(0, len(fr), gchunk):
-            await _client.write_gatt_char(w.TX, fr[j:j + gchunk], response=True)  # reliable: no dropped packets mid-frame
+            await _client.write_gatt_char(
+                w.TX, fr[j : j + gchunk], response=True
+            )  # reliable: no dropped packets mid-frame
         await asyncio.sleep(0.02)
     end = time.monotonic() + 45
     while time.monotonic() < end:
@@ -674,7 +749,8 @@ async def h_write(args):
 
 async def h_reboot(args):
     from flipperzero_protobuf.flipperzero_protobuf_compiled import system_pb2
-    mode = (args[0].upper() if args else "OS")
+
+    mode = args[0].upper() if args else "OS"
     if mode not in ("OS", "DFU", "UPDATE"):
         return {"ok": False, "text": f"bad mode {mode!r}"}
     mv = system_pb2.RebootRequest.RebootMode.Value(mode)
@@ -684,6 +760,7 @@ async def h_reboot(args):
         m.command_id = 1
         m.system_reboot_request.mode = mv
         return w._frame(m.SerializeToString())
+
     await _client.write_gatt_char(w.TX, build(), response=False)
     await asyncio.sleep(0.4)
     return {"ok": True, "text": f"REBOOT sent (mode={mode}) - device restarting"}
@@ -692,12 +769,16 @@ async def h_reboot(args):
 async def h_selftest(args):
     """Daemon diagnostics: state + ping RTT. Does NOT force a connect (reports current state)."""
     import os as _os
+
     connected = bool(_client and _client.is_connected)
     rtt = None
     if connected:
         t0 = time.monotonic()
-        r = await _txn(w._mk(lambda m: setattr(m.system_ping_request, "data", b"selftest")),
-                       lambda s, final=False: _first(s, lambda m: True if m.HasField("system_ping_response") else None), 6)
+        r = await _txn(
+            w._mk(lambda m: setattr(m.system_ping_request, "data", b"selftest")),
+            lambda s, final=False: _first(s, lambda m: True if m.HasField("system_ping_response") else None),
+            6,
+        )
         if r:
             rtt = round((time.monotonic() - t0) * 1000)
     idle = round(time.monotonic() - _last_activity[0], 1) if _last_activity[0] else None
@@ -705,8 +786,16 @@ async def h_selftest(args):
         f"daemon pid {_os.getpid()}, socket {SOCK}",
         f"BLE: {'CONNECTED' if connected else 'idle / not connected (connects lazily on next device command)'}",
         f"cached device (scan-free reconnect): {'yes' if _dev[0] is not None else 'no'}",
-        (f"ping RTT: {rtt} ms" if rtt is not None else ("ping: connected but no echo" if connected else "ping: skipped (not connected)")),
-        (f"last activity: {idle}s ago (auto-disconnect at {IDLE_SEC}s idle)" if idle is not None else "no activity yet this session"),
+        (
+            f"ping RTT: {rtt} ms"
+            if rtt is not None
+            else ("ping: connected but no echo" if connected else "ping: skipped (not connected)")
+        ),
+        (
+            f"last activity: {idle}s ago (auto-disconnect at {IDLE_SEC}s idle)"
+            if idle is not None
+            else "no activity yet this session"
+        ),
     ]
     return {"ok": True, "text": "SELFTEST\n  " + "\n  ".join(lines)}
 
@@ -725,15 +814,20 @@ async def h_read_latest(args):
                 if f.type == 0:
                     files.append(f.name)
         return True if (ms and not ms[-1].has_next) or final else None
+
     await _txn(w._mk(lambda m: setattr(m.storage_list_request, "path", folder)), lp, 15)
     if not files:
         return {"ok": False, "text": f"no files found in {folder}"}
     newest, newest_ts = files[-1], -1
     for name in files[:80]:
+
         def tp(snap, final=False):
             ms = _mains(snap)
             return ms[0].storage_timestamp_response.timestamp if ms else (-1 if final else None)
-        ts = await _txn(w._mk(lambda m, _p=f"{folder}/{name}": setattr(m.storage_timestamp_request, "path", _p)), tp, 8)
+
+        ts = await _txn(
+            w._mk(lambda m, _p=f"{folder}/{name}": setattr(m.storage_timestamp_request, "path", _p)), tp, 8
+        )
         if isinstance(ts, int) and ts > newest_ts:
             newest_ts, newest = ts, name
     path = f"{folder}/{newest}"
@@ -747,6 +841,7 @@ async def h_read_latest(args):
                 err[0] = m.command_status
             data.extend(m.storage_read_response.file.data)
         return True if (ms and not ms[-1].has_next) or final else None
+
     await _txn(w._mk(lambda m, _p=path: setattr(m.storage_read_request, "path", _p)), rp, 30)
     if err[0]:
         return {"ok": False, "text": f"read failed for {path}: {w._status_str(err[0])}"}
@@ -761,14 +856,38 @@ async def h_read_latest(args):
 
 
 COMMANDS = {
-    "health": h_health, "selftest": h_selftest, "readlatest": h_read_latest,
-    "info": h_info, "power": h_power, "ping": h_ping, "getdt": h_getdt,
-    "setdt": h_setdt, "locked": h_locked, "applock": h_applock, "apperror": h_apperror,
-    "unlock": h_unlock, "alert": h_alert, "appexit": h_appexit, "appload": h_appload,
-    "mkdir": h_mkdir, "delete": h_delete, "rename": h_rename, "gpioread": h_gpioread,
-    "gpiowrite": h_gpiowrite, "gpiomode": h_gpiomode, "stat": h_stat, "diskinfo": h_diskinfo,
-    "md5": h_md5, "list": h_list, "read": h_read, "screenshot": h_screenshot, "press": h_press,
-    "app": h_app, "appbutton": h_appbutton, "write": h_write, "reboot": h_reboot,
+    "health": h_health,
+    "selftest": h_selftest,
+    "readlatest": h_read_latest,
+    "info": h_info,
+    "power": h_power,
+    "ping": h_ping,
+    "getdt": h_getdt,
+    "setdt": h_setdt,
+    "locked": h_locked,
+    "applock": h_applock,
+    "apperror": h_apperror,
+    "unlock": h_unlock,
+    "alert": h_alert,
+    "appexit": h_appexit,
+    "appload": h_appload,
+    "mkdir": h_mkdir,
+    "delete": h_delete,
+    "rename": h_rename,
+    "gpioread": h_gpioread,
+    "gpiowrite": h_gpiowrite,
+    "gpiomode": h_gpiomode,
+    "stat": h_stat,
+    "diskinfo": h_diskinfo,
+    "md5": h_md5,
+    "list": h_list,
+    "read": h_read,
+    "screenshot": h_screenshot,
+    "press": h_press,
+    "app": h_app,
+    "appbutton": h_appbutton,
+    "write": h_write,
+    "reboot": h_reboot,
 }
 # commands that need a live BLE link (everything except these state-only ones)
 _NEEDS_BLE = set(COMMANDS) - {"health", "selftest"}
@@ -783,7 +902,7 @@ async def _handle(req):
     h = COMMANDS.get(cmd)
     if h is None:
         return {"ok": False, "text": f"unknown cmd {cmd!r}"}
-    async with _cmd_lock:   # serialize: one command at a time on the shared buffer/connection
+    async with _cmd_lock:  # serialize: one command at a time on the shared buffer/connection
         if cmd in _NEEDS_BLE:
             _last_activity[0] = time.monotonic()
             if not await _ensure():
@@ -792,9 +911,10 @@ async def _handle(req):
             out = await h(args)
         except Exception as e:
             import traceback
+
             log("handler error", cmd, repr(e), traceback.format_exc())
             if not (_client and _client.is_connected):
-                _client = None          # force a fresh (re)connect next call
+                _client = None  # force a fresh (re)connect next call
                 return {"ok": False, "text": "connection lost - retry"}
             return {"ok": False, "text": f"error: {type(e).__name__}: {e}"}
         _last_activity[0] = time.monotonic()
@@ -848,6 +968,7 @@ LOCK = os.path.join(_HOME, "bled.lock")
 async def _main():
     # singleton: hold an exclusive flock for the daemon's lifetime; racing spawns lose it and exit.
     import fcntl
+
     global _lockf
     _lockf = open(LOCK, "w")
     try:
@@ -865,7 +986,7 @@ async def _main():
         pass
     server = await asyncio.start_unix_server(_serve_client, path=SOCK)
     try:
-        os.chmod(SOCK, 0o600)   # owner-only — block other local users from driving the device
+        os.chmod(SOCK, 0o600)  # owner-only — block other local users from driving the device
     except OSError:
         pass
     asyncio.create_task(_idle_watch())
