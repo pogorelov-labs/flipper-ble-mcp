@@ -40,3 +40,9 @@ build/
 *.swp
 .idea/
 .vscode/
+
+# coverage artifacts
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
