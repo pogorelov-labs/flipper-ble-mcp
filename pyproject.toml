@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["ruff==0.15.18", "pytest", "pytest-cov"]
+dev = ["ruff==0.15.20", "pytest", "pytest-cov"]
 
 [project.scripts]
 flipper-ble-mcp = "flipper_ble_mcp.server:main"
